@@ -1,0 +1,58 @@
+
+body {
+	margin: 0px;
+	padding: 0px;
+	user-select: none;
+}
+
+h3[data-key="domain"] {
+	margin: 0px;
+	padding: 0px;
+	font-family: 'crystalline';
+	font-size: 24px;
+	font-weight: 500;
+	line-height: 32px;
+	text-transform: lowercase;
+}
+
+input[data-key="level"] {
+	display: block;
+	width: 100%;
+	margin: 0px;
+	padding: 0px;
+}
+
+span[data-key="info"] {
+	display: block;
+	width: 100%;
+	margin: 0px;
+	padding: 0px;
+}
+
+button[data-action="incognito"]:before {
+	content: '\e89e';
+}
+
+button[data-action="options"]:before {
+	content: '\e8b8';
+}
+
+header,
+footer {
+	display: block;
+	width: 200px;
+	height: auto;
+	margin: 0px;
+	padding: 0px;
+	font-family: 'vera-mono';
+	text-align: center;
+	font-size: 16px;
+	line-height: 24px;
+	box-sizing: border-box;
+}
+
+footer {
+	margin: 16px 0px 0px 0px;
+	text-align: right;
+}
+

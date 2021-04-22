@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+	<meta charset="utf-8">
+	<head>
+		<title>Defiant</title>
+		<style>
+
+			@import url("../design/common/index.css");
+			@import url("../design/common/theme.css");
+			@import url("../design/common/elements.css");
+			@import url("../chrome/popup.css");
+
+		</style>
+	</head>
+	<body data-page="popup">
+		<header>
+			<h3 data-key="domain">facebook.com</h3>
+			<input data-key="level" type="range" min="0" max="3" value="0"/>
+			<span data-key="info">Trust Level Zero</span>
+		</header>
+		<footer>
+			<button data-action="options" title="Open Defiant Options"></button>
+			<button data-action="incognito" title="Open Website in Incognito Window"></button>
+		</footer>
+		<script type="module" src="popup.mjs"></script>
+	</body>
+</html>

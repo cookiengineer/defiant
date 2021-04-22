@@ -1,0 +1,98 @@
+
+body,
+body[data-theme="dark"] {
+
+	color: #ffffff;
+	background: #000000;
+
+	--layout-default-color: #ffffff;
+	--layout-default-background: #000000;
+
+	--layout-focus-color: #ffffff;
+	--layout-focus-background: rgba(255,255,255,0.20);
+
+	--link-default-color: #22ccff;
+	--link-default-background: transparent;
+
+	--link-focus-color: #22ccff;
+	--link-focus-background: rgba(255,255,255,0.20);
+
+	--element-default-color: #aaaaaa;
+	--element-default-background: transparent;
+
+	--element-disable-color: #222222;
+	--element-disable-background: transparent;
+
+	--element-invalid-color: #ff2222;
+	--element-invalid-background: rgba(255, 34, 34, 0.20);
+
+	--element-focus-color: #ffffff;
+	--element-focus-background: rgba(255,255,255,0.20);
+
+	--element-active-color: #ffffff;
+	--element-active-background: rgba(255,255,255,0.10);
+
+	--element-select-color: #22ccff;
+	--element-select-background: rgba(51,153,255,0.20);
+
+	--scrollbar-default-color: #ffffff;
+	--scrollbar-default-background: transparent;
+
+	--surface-default-color: #666666;
+	--surface-default-background: rgba(255, 255, 255, 0.10);
+	--surface-default-foreground: #1a1a1a;
+
+	/* Necessary image due to Browser Quirks */
+	--element-select-default-background-image: url('./theme-dark-element-select-default.svg');
+	--element-select-focus-background-image: url('./theme-dark-element-select-focus.svg');
+
+}
+
+body[data-theme="light"] {
+
+	color: #111111;
+	background: #eeeeee;
+
+	--layout-default-color: #111111;
+	--layout-default-background: #eeeeee;
+
+	--layout-focus-color: #111111;
+	--layout-focus-background: rgba(0,0,0,0.20);
+
+	--link-default-color: #22ccff;
+	--link-default-background: transparent;
+
+	--link-focus-color: #22ccff;
+	--link-focus-background: rgba(34,204,255,0.20);
+
+	--element-default-color: #666666;
+	--element-default-background: transparent;
+
+	--element-disable-color: #dddddd;
+	--element-disable-background: transparent;
+
+	--element-invalid-color: #ff2222;
+	--element-invalid-background: rgba(255, 34, 34, 0.20);
+
+	--element-focus-color: #22ccff;
+	--element-focus-background: rgba(34,204,255,0.20);
+
+	--element-active-color: #22ccff;
+	--element-active-background: rgba(34,204,255,0.10);
+
+	--element-select-color: #22ccff;
+	--element-select-background: rgba(34,204,255,0.20);
+
+	--scrollbar-default-color: #111111;
+	--scrollbar-default-background: transparent;
+
+	--surface-default-color: #666666;
+	--surface-default-background: rgba(0, 0, 0, 0.025);
+	--surface-default-foreground: #e8e8e8;
+
+	/* Necessary image due to Browser Quirks */
+	--element-select-default-background-image: url('./theme-light-element-select-default.svg');
+	--element-select-focus-background-image: url('./theme-light-element-select-focus.svg');
+
+}
+
