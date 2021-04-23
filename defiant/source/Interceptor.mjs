@@ -1,7 +1,7 @@
 
-import { console, Emitter, isNumber, isObject } from '../extern/base.mjs';
-import { isDefiant                            } from '../source/Defiant.mjs';
-import { URL                                  } from '../source/parser/URL.mjs';
+import { Emitter, isNumber, isObject } from '../extern/base.mjs';
+import { isDefiant                   } from '../source/Defiant.mjs';
+import { URL                         } from '../source/parser/URL.mjs';
 
 
 
@@ -56,35 +56,95 @@ const Interceptor = function(settings, defiant, chrome) {
 			tab = this.defiant.toTab('chrome-' + details.tabId);
 		}
 
-		let level = 'zero';
+		let blocked = false;
+		let notify  = false;
+		let domain  = null;
+		let level   = 'zero';
+
 		if (tab !== null && tab.level !== null) {
-			level = tab.level;
+			domain = tab.level.domain;
+			level  = tab.level.level;
 		}
 
-		// TODO: Verify url.mime
-		// TODO: Check whether first-party, second-party
-		// TODO: Check whether third-party or known CDN
 
-		let blocked = false;
+		if (
+			url.mime.format === 'text/css'
+		) {
 
-		if (level === 'zero') {
+			if (level === 'zero' || level === 'alpha' || level === 'beta') {
 
-			if (url.mime.format === 'application/javascript') {
-				blocked = true;
+				if (URL.isDomain(URL.toDomain(url), domain) === true) {
+					blocked = false;
+				} else if (URL.isCDN(URL.toDomain(url)) === true) {
+					blocked = false;
+				} else {
+					notify  = true;
+					blocked = true;
+				}
+
+			} else if (level === 'gamma') {
+				blocked = false;
 			}
 
-		} else if (level === 'alpha') {
-			// TODO
-		} else if (level === 'beta') {
-			// TODO
-		} else if (level === 'gamma') {
-			// TODO
+		} else if (
+			url.mime.format === 'application/javascript'
+			|| url.mime.format === 'application/typescript'
+		) {
+
+			if (level === 'zero') {
+				blocked = true;
+			} else if (level === 'alpha' || level === 'beta') {
+
+				if (URL.isDomain(url, URL.toDomain(tab.url)) === true) {
+					blocked = false;
+				} else if (URL.isCDN(URL.toDomain(url)) === true) {
+					blocked = false;
+				} else {
+					notify  = true;
+					blocked = true;
+				}
+
+			} else if (level === 'gamma') {
+				blocked = false;
+			}
+
+		} else if (
+			url.mime.format.startsWith('font/')
+		) {
+			blocked = true;
 		}
 
 
-		// TODO: If a known advertisement network, block request
+		if (blocked === true && notify === true) {
 
-		console.log(url, blocked);
+			this.defiant.settings.notifications.push({
+				link:  URL.render(url),
+				level: level,
+				type:  'block'
+			});
+
+			this.defiant.storage.save();
+
+		}
+
+
+		if (blocked === false) {
+
+			let blockers = this.defiant.settings.blockers;
+
+			for (let b = 0, bl = blockers.length; b < bl; b++) {
+
+				let blocker = blockers[b];
+
+				if (URL.isDomain(blocker.domain, url) === true) {
+					blocked = true;
+					break;
+				}
+
+			}
+
+		}
+
 
 		return {
 			cancel: blocked
@@ -177,6 +237,7 @@ const Interceptor = function(settings, defiant, chrome) {
 		filter.call(details.responseHeaders, 'x-xss-protection');
 
 
+		// TODO: content-security-policy based on trust level
 		details.responseHeaders.push({
 			name:  'content-security-policy',
 			value: [

@@ -39,8 +39,9 @@ more features to make the website work.
 ## Trust Level: Beta
 
 - Disable Requests to known Advertisement Networks.
-- Enable `<frame>`, and `<iframe>`.
-- Enable `<script>` and `<meta http-equiv="refresh">`.
+- Enable `<meta http-equiv="refresh">` to first-party or second-party domains.
+- Enable `<frame>`, and `<iframe>` to first-party or second-party domains.
+- Enable `<script>`
 - Enable Cookies from first-party and second-party domains.
 - Enable Cookies from known CDNs.
 - Enable JavaScript from first-party and second-party domains.
@@ -63,24 +64,15 @@ more features to make the website work.
 - Don't Override Cache-related response headers.
 
 
+## Development Help
 
-## TODO: Settings API
+```bash
 
-- chrome.privacy.websites.hyperlinkAuditingEnabled.set({ value: false })
-- chrome.privacy.websites.referrersEnabled.set({ value: false })
-- chrome.privacy.websites.thirdPartyCookiesAllowed.set({ value: false })
+mkdir /tmp/defiant;
+chromium --user-data-dir=/tmp/defiant chrome://extensions;
 
+# Add Defiant Extension in chrome://extensions
+# inspect background.html page to debug the DEFIANT constant
 
-## TODO: Prevent and Cleanup
-
-- `<a ping>` attribute
-- `<meta http-equiv="refresh">` attribute
-
-
-## TODO: Other
-
-- Integrate Host Blockers (port from Stealth)
-- Port Interceptor / background code
-- Port content / cleanup and prevent code
-- Port Storage code
+```
 

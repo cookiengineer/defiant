@@ -37,16 +37,6 @@ const Storage = function(settings, defiant, chrome) {
 
 		});
 
-		fetch(this.chrome.runtime.getURL('extern/cdns.json')).then((response) => {
-			return response.json();
-		}).then((cdns) => {
-
-			if (isArray(cdns)) {
-				this.settings.cdns = cdns;
-			}
-
-		});
-
 	}
 
 };

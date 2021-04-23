@@ -56,7 +56,7 @@
 	"options_page": "chrome/options.html",
 	"web_accessible_resources": [
 		"extern/base.mjs",
-		"extern/blockers.json",
-		"extern/cdns.json"
+		"source/parser/IP.mjs",
+		"source/parser/URL.mjs"
 	]
 }

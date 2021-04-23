@@ -36,10 +36,10 @@ const Defiant = function(settings, chrome) {
 
 
 	this.settings = Object.assign({
-		debug:    false,
-		blockers: [],
-		cdns:     [],
-		levels:   []
+		debug:         false,
+		blockers:      [],
+		levels:        [],
+		notifications: []
 	}, settings);
 
 	this.interceptor = new Interceptor(this.settings, this, chrome);

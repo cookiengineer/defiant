@@ -59,6 +59,7 @@ const EVENTS = [
 ];
 
 
+
 EVENTS.forEach((event) => {
 
 	let nodes = Array.from(document.querySelectorAll('*[on' + event + ']'));
@@ -94,5 +95,10 @@ Array.from(document.querySelectorAll('a[href]')).forEach((link) => {
 		link.parentNode.removeChild(link);
 	}
 
+});
+
+
+Array.from(document.querySelectorAll('meta, link, frame, iframe, script, a')).forEach((node) => {
+	window.process(node);
 });
 
