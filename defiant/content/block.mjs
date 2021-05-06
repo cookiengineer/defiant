@@ -69,7 +69,24 @@ const process = window.process = (node) => {
 
 	} else if (node.tagName === 'LINK') {
 
-		if (node.getAttribute('rel') === 'stylesheet') {
+		let rel = node.getAttribute('rel');
+
+		if (
+			rel === 'dns-prefetch'
+			|| rel === 'modulepreload'
+			|| rel === 'preconnect'
+			|| rel === 'prefetch'
+			|| rel === 'preload'
+			|| rel === 'prerender'
+		) {
+
+			if (level === 'zero' || level === 'alpha' || level === 'beta') {
+				node.parentNode.removeChild(node);
+			} else if (level === 'gamma') {
+				// Do nothing
+			}
+
+		} else if (rel === 'stylesheet') {
 
 			if (level === 'zero' || level === 'alpha' || level === 'beta') {
 
@@ -145,6 +162,52 @@ const process = window.process = (node) => {
 		if (node.getAttribute('ping') !== null) {
 			node.setAttribute('ping', null);
 			node.removeAttribute('ping');
+		}
+
+		let href = (node.getAttribute('href') || '').trim();
+
+		if (
+			href === ''
+			|| href === '#'
+			|| href.startsWith('javascript:')
+		) {
+			node.parentNode.removeChild(node);
+		}
+
+	} else if (node.tagName === 'IMG') {
+
+		let src         = (node.getAttribute('src') || '').trim();
+		let srcset      = (node.getAttribute('srcset') || '').trim();
+		let data_src    = (node.getAttribute('data-src') || '').trim();
+		let data_srcset = (node.getAttribute('data-srcset') || '').trim();
+
+		if (
+			src.startsWith('data:')
+			|| src.startsWith('javascript:')
+			|| src.startsWith('#')
+			|| src === ''
+		) {
+
+			if (
+				data_src.endsWith('.gif')
+				|| data_src.endsWith('.jpg')
+				|| data_src.endsWith('.png')
+			) {
+				node.setAttribute('src', data_src);
+			}
+
+		}
+
+		if (srcset === '') {
+
+			if (
+				data_srcset.includes('.gif')
+				|| data_srcset.includes('.jpg')
+				|| data_srcset.includes('.png')
+			) {
+				node.setAttribute('srcset', data_srcset);
+			}
+
 		}
 
 	} else if (node.textContent.startsWith('<!--[')) {

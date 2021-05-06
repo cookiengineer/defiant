@@ -4,7 +4,8 @@
 	"version": "0.0.1",
 	"description": "Stay protected from Ads, JavaScript, Cookies and other Fingerprinting Techniques",
 	"icons": {
-		"48": "design/icon-48.png",
+		"16":  "design/icon-16.png",
+		"48":  "design/icon-48.png",
 		"128": "design/icon-128.png"
 	},
 	"background": {

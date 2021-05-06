@@ -76,3 +76,11 @@ chromium --user-data-dir=/tmp/defiant chrome://extensions;
 
 ```
 
+
+## Acknowledgements
+
+The Chrome Extension Icon is licensed under the CC-BY-SA 3.0
+license; it is itself a modified version that was originally
+created by [Alpar-Etele Meder](https://dribbble.com/Pocike)
+and available via [his Iconfinder Page](https://www.iconfinder.com/pocike).
+
