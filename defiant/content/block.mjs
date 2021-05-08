@@ -332,8 +332,12 @@ const process = window.process = (node) => {
 
 		if (src !== null) {
 
-			if (node.getAttribute('src') !== src.link) {
-				node.setAttribute('src', src.link);
+			if (src.mime.format.startsWith('image/')) {
+
+				if (node.getAttribute('src') !== src.link) {
+					node.setAttribute('src', src.link);
+				}
+
 			}
 
 		} else if (data_src !== null) {
@@ -361,20 +365,61 @@ const process = window.process = (node) => {
 
 		}
 
+		if (level === 'zero') {
+			node.parentNode.removeChild(node);
+		} else if (level === 'alpha' || level === 'beta') {
+
+			let source = resolve(node.getAttribute('src'));
+			if (source !== null) {
+
+				if (URL.isDomain(domain, URL.toDomain(source)) === true) {
+					// Do Nothing
+				} else if (URL.isCDN(URL.toDomain(source)) === true) {
+					// Do Nothing
+				} else {
+
+					report({
+						domain: domain,
+						level:  level,
+						link:   URL.render(source),
+						type:   'media'
+					});
+
+					node.parentNode.removeChild(node);
+
+				}
+
+			} else {
+				node.parentNode.removeChild(node);
+			}
+
+		} else if (level === 'gamma') {
+			// Do Nothing
+		}
+
 	} else if (node.tagName === 'VIDEO') {
+
+		if (node.getAttribute('autoplay') !== null) {
+			node.setAttribute('autoplay', null);
+			node.removeAttribute('autoplay');
+		}
 
 		let src      = resolve(node.getAttribute('src'));
 		let data_src = resolve(node.getAttribute('data-src'));
 
 		if (src !== null) {
 
-			if (node.getAttribute('src') !== src.link) {
-				node.setAttribute('src', src.link);
+			if (data_src.mime.format.startsWith('video/')) {
+
+				if (node.getAttribute('src') !== src.link) {
+					node.setAttribute('src', src.link);
+				}
+
 			}
 
 		} else if (data_src !== null) {
 
-			if (data_src.mime.format.startsWith('image/')) {
+			if (data_src.mime.format.startsWith('video/')) {
 
 				node.setAttribute('src', data_src.link);
 				node.removeAttribute('data-src');
@@ -383,7 +428,37 @@ const process = window.process = (node) => {
 
 		}
 
-		node.removeAttribute('autoplay');
+		if (level === 'zero') {
+			node.parentNode.removeChild(node);
+		} else if (level === 'alpha' || level === 'beta') {
+
+			let source = resolve(node.getAttribute('src'));
+			if (source !== null) {
+
+				if (URL.isDomain(domain, URL.toDomain(source)) === true) {
+					// Do Nothing
+				} else if (URL.isCDN(URL.toDomain(source)) === true) {
+					// Do Nothing
+				} else {
+
+					report({
+						domain: domain,
+						level:  level,
+						link:   URL.render(source),
+						type:   'media'
+					});
+
+					node.parentNode.removeChild(node);
+
+				}
+
+			} else {
+				node.parentNode.removeChild(node);
+			}
+
+		} else if (level === 'gamma') {
+			// Do Nothing
+		}
 
 	} else if (node.textContent.startsWith('<!--[')) {
 		node.parentNode.removeChild(node);

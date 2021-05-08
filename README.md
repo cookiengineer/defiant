@@ -15,6 +15,7 @@ more features to make the website work.
 - Disable HTTP Location/Refresh redirects.
 - Disable Link Prefetching from all domains.
 - Disable Images from all domains.
+- Disable Videos from all domains.
 - Disable Frames from all domains.
 - Disable Cookies from all domains.
 - Disable JS from all domains.
@@ -23,13 +24,13 @@ more features to make the website work.
 ## Trust Level: Alpha
 
 - Enable Images from first-party or second-party domains or known CDNs.
+- Enable Videos from first-party or second-party domains or known CDNs.
 - Enable JS from first-party or second-party domains or known CDNs.
 
 ## Trust Level: Beta
 
 - Enable HTTP Location/Refresh redirects to first-party or second-party domains.
 - Enable Link Prefetching to first-party or second-party domains or known CDNs.
-- Enable Images from all domains.
 - Enable Frames from first-party or second-party domains.
 - Enable Cookies from first-party or second-party domains.
 
@@ -37,6 +38,9 @@ more features to make the website work.
 
 - Enable HTTP Location/Refresh redirects to all domains.
 - Enable Link Prefetching from all domains.
+- Enable Images from all domains.
+- Enable Videos from all domains.
+- Enable Frames from all domains.
 - Enable Cookies from all domains.
 - Enable JS from all domains.
 - Enable CSS from all domains.
