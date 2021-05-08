@@ -1,7 +1,7 @@
 
-import { Emitter, isNumber, isObject } from '../extern/base.mjs';
-import { isDefiant                   } from '../source/Defiant.mjs';
-import { URL                         } from '../source/parser/URL.mjs';
+import { console, Emitter, isNumber, isObject, isString } from '../extern/base.mjs';
+import { isDefiant                             } from '../source/Defiant.mjs';
+import { URL                                   } from '../source/parser/URL.mjs';
 
 
 
@@ -9,23 +9,60 @@ const BYPASS = {
 	'mannheimer-morgen.de': 'Googlebot/2.1 (+http://www.google.com/bot.html)'
 };
 
-const FILTER = {
-	urls: [ 'https://*/*', 'http://*/*' ]
-};
-
 export const isInterceptor = function(obj) {
 	return Object.prototype.toString.call(obj) === '[object Interceptor]';
 };
 
-const filter = function(name) {
+const filter = function(headers, names) {
 
-	for (let i = 0; i < this.length; i++) {
+	for (let h = 0; h < headers.length; h++) {
 
-		if (this[i].name.toLowerCase() === name) {
-			this.splice(i, 1);
+		let name = headers[h].name.toLowerCase();
+		if (names.includes(name) === true) {
+			headers.splice(h, 1);
 		}
 
 	}
+
+};
+
+const toCookies = function(headers, name) {
+
+	let cookies = [];
+
+	for (let h = 0; h < headers.length; h++) {
+
+		if (headers[h].name.toLowerCase() === name) {
+
+			let chunks = (headers[h].value || '').split(';').map((c) => c.trim());
+
+			console.log(chunks);
+
+		}
+
+	}
+
+	return cookies;
+
+};
+
+const toValue = function(headers, name) {
+
+	let value = null;
+
+	for (let h = 0; h < headers.length; h++) {
+
+		if (headers[h].name.toLowerCase() === name) {
+			value = headers[h].value || null;
+		}
+
+		if (value !== null) {
+			break;
+		}
+
+	}
+
+	return value;
 
 };
 
@@ -57,9 +94,10 @@ const Interceptor = function(settings, defiant, chrome) {
 		}
 
 		let blocked = false;
-		let notify  = false;
+		let report  = false;
 		let domain  = null;
 		let level   = 'zero';
+		let type    = 'request';
 
 		if (tab !== null && tab.level !== null) {
 			domain = tab.level.domain;
@@ -71,14 +109,16 @@ const Interceptor = function(settings, defiant, chrome) {
 			url.mime.format === 'text/css'
 		) {
 
+			type = 'style';
+
 			if (level === 'zero' || level === 'alpha' || level === 'beta') {
 
-				if (URL.isDomain(URL.toDomain(url), domain) === true) {
+				if (URL.isDomain(domain, URL.toDomain(url)) === true) {
 					blocked = false;
 				} else if (URL.isCDN(URL.toDomain(url)) === true) {
 					blocked = false;
 				} else {
-					notify  = true;
+					report  = true;
 					blocked = true;
 				}
 
@@ -91,16 +131,18 @@ const Interceptor = function(settings, defiant, chrome) {
 			|| url.mime.format === 'application/typescript'
 		) {
 
+			type = 'script';
+
 			if (level === 'zero') {
 				blocked = true;
 			} else if (level === 'alpha' || level === 'beta') {
 
-				if (URL.isDomain(url, URL.toDomain(tab.url)) === true) {
+				if (URL.isDomain(domain, URL.toDomain(url)) === true) {
 					blocked = false;
 				} else if (URL.isCDN(URL.toDomain(url)) === true) {
 					blocked = false;
 				} else {
-					notify  = true;
+					report  = true;
 					blocked = true;
 				}
 
@@ -111,19 +153,9 @@ const Interceptor = function(settings, defiant, chrome) {
 		} else if (
 			url.mime.format.startsWith('font/')
 		) {
+
+			type    = 'asset';
 			blocked = true;
-		}
-
-
-		if (blocked === true && notify === true) {
-
-			this.defiant.settings.notifications.push({
-				link:  URL.render(url),
-				level: level,
-				type:  'block'
-			});
-
-			this.defiant.storage.save();
 
 		}
 
@@ -136,12 +168,25 @@ const Interceptor = function(settings, defiant, chrome) {
 
 				let blocker = blockers[b];
 
-				if (URL.isDomain(blocker.domain, url) === true) {
+				if (URL.isDomain(blocker.domain, URL.toDomain(url)) === true) {
+					report  = true;
 					blocked = true;
 					break;
 				}
 
 			}
+
+		}
+
+
+		if (blocked === true && report === true) {
+
+			this.report({
+				domain: domain,
+				link:   URL.render(url),
+				level:  level,
+				type:   type
+			});
 
 		}
 
@@ -154,31 +199,74 @@ const Interceptor = function(settings, defiant, chrome) {
 
 	this.__state.listeners['filter-request-headers'] = (details) => {
 
-		filter.call(details.requestHeaders, 'a-im');
-		filter.call(details.requestHeaders, 'accept-charset');
-		filter.call(details.requestHeaders, 'accept-datetime');
-		filter.call(details.requestHeaders, 'cache-control');
-		filter.call(details.requestHeaders, 'cookie');
-		filter.call(details.requestHeaders, 'from');
-		filter.call(details.requestHeaders, 'http2-settings');
-		filter.call(details.requestHeaders, 'host');
-		filter.call(details.requestHeaders, 'if-match');
-		filter.call(details.requestHeaders, 'if-modified-since');
-		filter.call(details.requestHeaders, 'if-none-match');
-		filter.call(details.requestHeaders, 'if-range');
-		filter.call(details.requestHeaders, 'if-unmodified-since');
-		filter.call(details.requestHeaders, 'max-forwards');
-		filter.call(details.requestHeaders, 'origin');
-		filter.call(details.requestHeaders, 'pragma');
-		filter.call(details.requestHeaders, 'proxy-authorization');
-		filter.call(details.requestHeaders, 'referer');
-		filter.call(details.requestHeaders, 'upgrade');
-		filter.call(details.requestHeaders, 'user-agent');
-		filter.call(details.requestHeaders, 'via');
-		filter.call(details.requestHeaders, 'warning');
+		let url = URL.parse(details.url);
+		let tab = null;
+
+		if (isNumber(details.tabId) === true) {
+			tab = this.defiant.toTab('chrome-' + details.tabId);
+		}
+
+		let domain = null;
+		let level  = 'zero';
+
+		if (tab !== null && tab.level !== null) {
+			domain = tab.level.domain;
+			level  = tab.level.level;
+		}
 
 
-		let url    = URL.parse(details.url);
+		if (level === 'zero' || level === 'alpha') {
+
+			filter(details.requestHeaders, [
+				'origin',
+				'referer'
+			]);
+
+		} else if (level === 'beta') {
+
+			// TODO: Allow Referer and Origin for first-party and second-party domain
+
+		} else if (level === 'gamma') {
+			// Do Nothing
+		}
+
+
+		if (level === 'zero' || level === 'alpha') {
+
+			filter(details.requestHeaders, [
+				'cookie'
+			]);
+
+		} else if (level === 'beta' || level === 'gamma') {
+
+			// TODO: Enable Cookies from first-party or second-party domain
+
+		}
+
+
+		filter(details.requestHeaders, [
+			'a-im',
+			'accept-charset',
+			'accept-datetime',
+			'cache-control',
+			'from',
+			'http2-settings',
+			'host',
+			'if-match',
+			'if-modified-since',
+			'if-none-match',
+			'if-range',
+			'if-unmodified-since',
+			'max-forwards',
+			'pragma',
+			'proxy-authorization',
+			'upgrade',
+			'user-agent',
+			'via',
+			'warning'
+		]);
+
+
 		let bypass = BYPASS[url.domain] || null;
 		if (bypass !== null) {
 
@@ -198,46 +286,171 @@ const Interceptor = function(settings, defiant, chrome) {
 
 	this.__state.listeners['filter-response-headers'] = (details) => {
 
-		filter.call(details.responseHeaders, 'age');
-		filter.call(details.responseHeaders, 'allow');
-		filter.call(details.responseHeaders, 'alt-svc');
-		filter.call(details.responseHeaders, 'cache-control');
-		filter.call(details.responseHeaders, 'content-location');
-		filter.call(details.responseHeaders, 'delta-base');
-		filter.call(details.responseHeaders, 'etag');
-		filter.call(details.responseHeaders, 'expires');
-		filter.call(details.responseHeaders, 'im');
-		filter.call(details.responseHeaders, 'last-modified');
-		filter.call(details.responseHeaders, 'link');
-		filter.call(details.responseHeaders, 'p3p');
-		filter.call(details.responseHeaders, 'pragma');
-		filter.call(details.responseHeaders, 'proxy-authenticate');
-		filter.call(details.responseHeaders, 'public-key-pins');
-		filter.call(details.responseHeaders, 'retry-after');
-		filter.call(details.responseHeaders, 'server');
-		filter.call(details.responseHeaders, 'set-cookie');
-		filter.call(details.responseHeaders, 'strict-transport-security');
-		filter.call(details.responseHeaders, 'upgrade');
-		filter.call(details.responseHeaders, 'vary');
-		filter.call(details.responseHeaders, 'via');
-		filter.call(details.responseHeaders, 'warning');
-		filter.call(details.responseHeaders, 'www-authenticate');
-		filter.call(details.responseHeaders, 'x-frame-options');
-		filter.call(details.responseHeaders, 'refresh');
-		filter.call(details.responseHeaders, 'content-security-policy');
-		filter.call(details.responseHeaders, 'timing-allow-origin');
-		filter.call(details.responseHeaders, 'x-content-security-policy');
-		filter.call(details.responseHeaders, 'x-content-duration');
-		filter.call(details.responseHeaders, 'x-content-type-options');
-		filter.call(details.responseHeaders, 'x-correlation-id');
-		filter.call(details.responseHeaders, 'x-powered-by');
-		filter.call(details.responseHeaders, 'x-request-id');
-		filter.call(details.responseHeaders, 'x-ua-compatible');
-		filter.call(details.responseHeaders, 'x-webkit-csp');
-		filter.call(details.responseHeaders, 'x-xss-protection');
+		let url = URL.parse(details.url);
+		let tab = null;
+
+		if (isNumber(details.tabId) === true) {
+			tab = this.defiant.toTab('chrome-' + details.tabId);
+		}
+
+		let domain = null;
+		let level  = 'zero';
+
+		if (tab !== null && tab.level !== null) {
+			domain = tab.level.domain;
+			level  = tab.level.level;
+		}
+
+
+		if (level === 'zero' || level === 'alpha') {
+
+			filter(details.responseHeaders, [
+				'location',
+				'refresh'
+			]);
+
+		} else if (level === 'beta') {
+
+			let redirect = null;
+			let content  = toValue(details.responseHeaders, 'content-location');
+			let location = toValue(details.responseHeaders, 'location');
+			let refresh  = toValue(details.responseHeaders, 'refresh');
+
+			if (location !== null) {
+				redirect = URL.parse(location);
+			} else if (refresh !== null) {
+				redirect = URL.parse(refresh.split('; url=').pop());
+			} else if (content !== null) {
+				redirect = URL.parse(content);
+			}
+
+			if (URL.isDomain(domain, URL.toDomain(redirect)) === true) {
+				// Do Nothing
+			} else {
+
+				filter(details.responseHeaders, [
+					'content-location',
+					'location',
+					'refresh'
+				]);
+
+			}
+
+		} else if (level === 'gamma') {
+			// Do Nothing
+		}
+
+
+		// XXX: Remove this, it's here for debugging purposes
+		toCookies(details.responseHeaders, 'set-cookie');
+
+
+		if (level === 'zero' || level === 'alpha') {
+
+			filter(details.responseHeaders, [
+				'set-cookie'
+			]);
+
+		} else if (level === 'beta') {
+
+			let cookies = toCookies(details.responseHeaders, 'set-cookie');
+			if (cookies.length > 0) {
+				// TODO: Enable Cookies from first-party or second-party domain
+			}
+
+		} else if (level === 'gamma') {
+			// Do Nothing
+		}
+
+
+		if (level === 'zero' || level === 'alpha' || level === 'beta') {
+
+			filter(details.responseHeaders, [
+				'age',
+				'cache-control',
+				'etag',
+				'expires',
+				'last-modified',
+				'pragma'
+			]);
+
+			details.responseHeaders.push({
+				name:  'age',
+				value: '0'
+			});
+
+			details.responseHeaders.push({
+				name:  'cache-control',
+				value: 'public, max-age=311040000, immutable'
+			});
+
+			details.responseHeaders.push({
+				name:  'expires',
+				value: 'Tue, 31 Dec 2999 23:00:00 GMT'
+			});
+
+		} else if (level === 'gamma') {
+			// Do Nothing
+		}
+
+
+		if (
+			level === 'zero'
+			|| level === 'alpha'
+			|| level === 'beta'
+		) {
+
+			filter(details.responseHeaders, [
+				'allow',
+				'alt-svc',
+				'delta-base',
+				'im',
+				'link',
+				'p3p',
+				'proxy-authenticate',
+				'public-key-pins',
+				'retry-after',
+				// 'server',
+				'strict-transport-security',
+				'upgrade',
+				'vary',
+				'via',
+				'warning',
+				'www-authenticate',
+				'x-frame-options',
+				'content-security-policy',
+				'timing-allow-origin',
+				'x-cache',
+				'x-cache-status',
+				'x-content-security-policy',
+				'x-content-duration',
+				'x-content-type-options',
+				'x-correlation-id',
+				'x-powered-by',
+				'x-request-id',
+				'x-ua-compatible',
+				'x-webkit-csp',
+				'x-xss-protection'
+			]);
+
+		} else if (level === 'gamma') {
+
+			// TODO: Integrate API vs static request
+			// TODO: Enforce cache via cache-control, pragma, expires headers
+			// TODO: Set headers manually if none given
+
+			// Do Nothing
+
+		}
 
 
 		// TODO: content-security-policy based on trust level
+		// if (level === 'zero') {
+		// } else if (level === 'alpha') {
+		// } else if (level === 'beta') {
+		// } else if (level === 'gamma') {
+		// }
+
 		details.responseHeaders.push({
 			name:  'content-security-policy',
 			value: [
@@ -308,9 +521,23 @@ Interceptor.prototype = Object.assign({}, Emitter.prototype, {
 
 			if (this.chrome !== null) {
 
-				this.chrome.webRequest.onBeforeRequest.addListener(this.__state.listeners['request'], FILTER, [ 'blocking', 'requestBody', 'extraHeaders' ]);
-				this.chrome.webRequest.onBeforeSendHeaders.addListener(this.__state.listeners['filter-request-headers'], FILTER, [ 'blocking', 'requestHeaders', 'extraHeaders' ]);
-				this.chrome.webRequest.onHeadersReceived.addListener(this.__state.listeners['filter-response-headers'], FILTER, [ 'blocking', 'responseHeaders', 'extraHeaders' ]);
+				this.chrome.webRequest.onBeforeRequest.addListener(
+					this.__state.listeners['request'],
+					{ urls: [ 'https://*/*', 'http://*/*' ] },
+					[ 'blocking', 'requestBody', 'extraHeaders' ]
+				);
+
+				this.chrome.webRequest.onBeforeSendHeaders.addListener(
+					this.__state.listeners['filter-request-headers'],
+					{ urls: [ 'https://*/*', 'http://*/*' ] },
+					[ 'blocking', 'requestHeaders', 'extraHeaders' ]
+				);
+
+				this.chrome.webRequest.onHeadersReceived.addListener(
+					this.__state.listeners['filter-response-headers'],
+					{ urls: [ 'https://*/*', 'http://*/*' ] },
+					[ 'blocking', 'responseHeaders', 'extraHeaders' ]
+				);
 
 				this.__state.connected = true;
 
@@ -341,6 +568,31 @@ Interceptor.prototype = Object.assign({}, Emitter.prototype, {
 
 
 		return false;
+
+	},
+
+	report: function(data) {
+
+		let domain = data.domain || null;
+		let link   = data.link   || null;
+		let level  = data.level  || 'zero';
+		let type   = data.type   || null;
+
+		if (
+			isString(domain) === true
+			&& isString(link) === true
+			&& isString(level) === true
+			&& isString(type) ===  true
+		) {
+
+			this.settings.statistics.push({
+				domain: domain,
+				level:  level,
+				link:   link,
+				type:   type
+			});
+
+		}
 
 	}
 

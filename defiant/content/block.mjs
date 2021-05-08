@@ -8,24 +8,87 @@ const RUNTIME = window.RUNTIME = {
 		level:  'zero'
 	},
 
-	URL: null // No ESM Imports in content script allowed
+	// No ESM Imports in content script allowed
+	BASE: null,
+	URL:  null
 
 };
 
-const notify = (data) => {
+
+
+const report = (data) => {
 
 	chrome.runtime.sendMessage({
-		type: 'notification',
+		type: 'statistics',
 		data: data
 	});
 
 };
 
+const resolve = (href) => {
+
+	href = (href || '').trim();
+
+
+	const BASE = RUNTIME.BASE;
+	const URL  = RUNTIME.URL;
+	let   url  = null;
+
+	if (
+		href === ''
+		|| href === '#'
+		|| href.startsWith('data:')
+		|| href.startsWith('javascript:')
+	) {
+		url = null;
+	} else if (
+		href.startsWith('https://')
+		|| href.startsWith('http://')
+	) {
+		url = URL.parse(href);
+	} else if (
+		href.startsWith('//')
+	) {
+		url = URL.parse(BASE.protocol + ':' + href);
+	} else if (
+		href.startsWith('/')
+		|| href.startsWith('./')
+	) {
+		url = URL.resolve(BASE, href);
+	} else {
+		url = URL.resolve(BASE, './' + href);
+	}
+
+	return url;
+
+};
+
+const match = (node) => {
+
+	if (
+		node.tagName === 'META'
+		|| node.tagName === 'LINK'
+		|| node.tagName === 'FRAME'
+		|| node.tagName === 'IFRAME'
+		|| node.tagName === 'SCRIPT'
+		|| node.tagName === 'A'
+		|| node.tagName === 'IMG'
+		|| node.tagName === 'VIDEO'
+		|| node.textContent.startsWith('<!--[')
+	) {
+		return true;
+	}
+
+	return false;
+
+};
+
 const process = window.process = (node) => {
 
-	let URL    = RUNTIME.URL;
-	let domain = RUNTIME.data.domain;
-	let level  = RUNTIME.data.level;
+	const URL    = RUNTIME.URL;
+	const domain = RUNTIME.data.domain;
+	const level  = RUNTIME.data.level;
+
 
 	if (node.tagName === 'META') {
 
@@ -44,23 +107,41 @@ const process = window.process = (node) => {
 			if (key === 'location' || key === 'refresh') {
 
 				if (level === 'zero' || level === 'alpha') {
+
+					report({
+						domain: domain,
+						level:  level,
+						link:   URL.render(redirect),
+						type:   'redirect'
+					});
+
 					node.parentNode.removeChild(node);
+
 				} else if (level === 'beta') {
 
-					if (URL.isDomain(URL.toDomain(redirect), domain) === true) {
-						// Do nothing
+					if (URL.isDomain(domain, URL.toDomain(redirect)) === true) {
+						// Do Nothing
 					} else {
+
+						report({
+							domain: domain,
+							level:  level,
+							link:   URL.render(redirect),
+							type:   'redirect'
+						});
+
 						node.parentNode.removeChild(node);
+
 					}
 
 				} else if (level === 'gamma') {
-					// Do nothing
+					// Do Nothing
 				}
 
 			} else if (key === 'content-type') {
-				// Do nothing
+				// Do Nothing
 			} else if (key === 'x-ua-compatible') {
-				// Do nothing
+				// Do Nothing
 			} else {
 				node.parentNode.removeChild(node);
 			}
@@ -80,35 +161,79 @@ const process = window.process = (node) => {
 			|| rel === 'prerender'
 		) {
 
-			if (level === 'zero' || level === 'alpha' || level === 'beta') {
+			if (level === 'zero' || level === 'alpha') {
+
+				let src = resolve(node.getAttribute('href'));
+
+				report({
+					domain: domain,
+					level:  level,
+					link:   URL.render(src),
+					type:   'prefetch'
+				});
+
 				node.parentNode.removeChild(node);
+
+			} else if (level === 'beta') {
+
+				let src = resolve(node.getAttribute('href'));
+				if (src !== null) {
+
+					if (URL.isDomain(domain, URL.toDomain(src)) === true) {
+						// Do Nothing
+					} else if (URL.isCDN(URL.toDomain(src)) === true) {
+						// Do Nothing
+					} else {
+
+						report({
+							domain: domain,
+							level:  level,
+							link:   URL.render(src),
+							type:   'prefetch'
+						});
+
+						node.parentNode.removeChild(node);
+
+					}
+
+				} else {
+					node.parentNode.removeChild(node);
+				}
+
 			} else if (level === 'gamma') {
-				// Do nothing
+				// Do Nothing
 			}
 
 		} else if (rel === 'stylesheet') {
 
 			if (level === 'zero' || level === 'alpha' || level === 'beta') {
 
-				let src = URL.parse(node.getAttribute('href'));
-				if (URL.isDomain(URL.toDomain(src), domain) === true) {
-					// Do nothing
-				} else if (URL.isCDN(URL.toDomain(src)) === true) {
-					// Do nothing
+				let src = resolve(node.getAttribute('href'));
+				if (src !== null) {
+
+					if (URL.isDomain(domain, URL.toDomain(src)) === true) {
+						// Do Nothing
+					} else if (URL.isCDN(URL.toDomain(src)) === true) {
+						// Do Nothing
+					} else {
+
+						report({
+							domain: domain,
+							level:  level,
+							link:   URL.render(src),
+							type:   'style'
+						});
+
+						node.parentNode.removeChild(node);
+
+					}
+
 				} else {
-
-					notify({
-						level: level,
-						link:  URL.render(src),
-						type:  'block'
-					});
-
 					node.parentNode.removeChild(node);
-
 				}
 
 			} else if (level === 'gamma') {
-				// Do nothing
+				// Do Nothing
 			}
 
 		}
@@ -119,15 +244,30 @@ const process = window.process = (node) => {
 			node.parentNode.removeChild(node);
 		} else if (level === 'beta') {
 
-			let src = URL.parse(node.getAttribute('src'));
-			if (URL.isDomain(URL.toDomain(src), domain) === true) {
-				// Do nothing
+			let src = resolve(node.getAttribute('src'));
+			if (src !== null) {
+
+				if (URL.isDomain(domain, URL.toDomain(src)) === true) {
+					// Do Nothing
+				} else {
+
+					report({
+						domain: domain,
+						level:  level,
+						link:   URL.render(src),
+						type:   'frame'
+					});
+
+					node.parentNode.removeChild(node);
+
+				}
+
 			} else {
 				node.parentNode.removeChild(node);
 			}
 
 		} else if (level === 'gamma') {
-			// Do nothing
+			// Do Nothing
 		}
 
 	} else if (node.tagName === 'SCRIPT') {
@@ -136,25 +276,32 @@ const process = window.process = (node) => {
 			node.parentNode.removeChild(node);
 		} else if (level === 'alpha' || level === 'beta') {
 
-			let src = URL.parse(node.getAttribute('src'));
-			if (URL.isDomain(URL.toDomain(src), domain) === true) {
-				// Do nothing
-			} else if (URL.isCDN(URL.toDomain(src)) === true) {
-				// Do nothing
+			let src = resolve(node.getAttribute('src'));
+			if (src !== null) {
+
+				if (URL.isDomain(domain, URL.toDomain(src)) === true) {
+					// Do Nothing
+				} else if (URL.isCDN(URL.toDomain(src)) === true) {
+					// Do Nothing
+				} else {
+
+					report({
+						domain: domain,
+						level:  level,
+						link:   URL.render(src),
+						type:   'script'
+					});
+
+					node.parentNode.removeChild(node);
+
+				}
+
 			} else {
-
-				notify({
-					level: level,
-					link:  URL.render(src),
-					type:  'block'
-				});
-
 				node.parentNode.removeChild(node);
-
 			}
 
 		} else if (level === 'gamma') {
-			// Do nothing
+			// Do Nothing
 		}
 
 	} else if (node.tagName === 'A') {
@@ -164,36 +311,38 @@ const process = window.process = (node) => {
 			node.removeAttribute('ping');
 		}
 
-		let href = (node.getAttribute('href') || '').trim();
+		let href = resolve(node.getAttribute('href'));
+		if (href !== null) {
 
-		if (
-			href === ''
-			|| href === '#'
-			|| href.startsWith('javascript:')
-		) {
+			// TODO: This is incorrect: Include Hash!
+			if (node.getAttribute('href') !== href.link) {
+				node.setAttribute('href', href.link);
+			}
+
+		} else {
 			node.parentNode.removeChild(node);
 		}
 
 	} else if (node.tagName === 'IMG') {
 
-		let src         = (node.getAttribute('src') || '').trim();
+		let src         = resolve(node.getAttribute('src'));
+		let data_src    = resolve(node.getAttribute('data-src'));
 		let srcset      = (node.getAttribute('srcset') || '').trim();
-		let data_src    = (node.getAttribute('data-src') || '').trim();
 		let data_srcset = (node.getAttribute('data-srcset') || '').trim();
 
-		if (
-			src.startsWith('data:')
-			|| src.startsWith('javascript:')
-			|| src.startsWith('#')
-			|| src === ''
-		) {
+		if (src !== null) {
 
-			if (
-				data_src.endsWith('.gif')
-				|| data_src.endsWith('.jpg')
-				|| data_src.endsWith('.png')
-			) {
-				node.setAttribute('src', data_src);
+			if (node.getAttribute('src') !== src.link) {
+				node.setAttribute('src', src.link);
+			}
+
+		} else if (data_src !== null) {
+
+			if (data_src.mime.format.startsWith('image/')) {
+
+				node.setAttribute('src', data_src.link);
+				node.removeAttribute('data-src');
+
 			}
 
 		}
@@ -205,10 +354,36 @@ const process = window.process = (node) => {
 				|| data_srcset.includes('.jpg')
 				|| data_srcset.includes('.png')
 			) {
+				// TODO: Parse srcset and filter by domains
 				node.setAttribute('srcset', data_srcset);
+				node.removeAttribute('data-srcset');
 			}
 
 		}
+
+	} else if (node.tagName === 'VIDEO') {
+
+		let src      = resolve(node.getAttribute('src'));
+		let data_src = resolve(node.getAttribute('data-src'));
+
+		if (src !== null) {
+
+			if (node.getAttribute('src') !== src.link) {
+				node.setAttribute('src', src.link);
+			}
+
+		} else if (data_src !== null) {
+
+			if (data_src.mime.format.startsWith('image/')) {
+
+				node.setAttribute('src', data_src.link);
+				node.removeAttribute('data-src');
+
+			}
+
+		}
+
+		node.removeAttribute('autoplay');
 
 	} else if (node.textContent.startsWith('<!--[')) {
 		node.parentNode.removeChild(node);
@@ -220,35 +395,53 @@ const process = window.process = (node) => {
 
 (async () => {
 
+	const NODES = [];
+
 	await import(chrome.runtime.getURL('source/parser/URL.mjs')).then((mod) => {
+
 		RUNTIME.URL = mod['URL'];
+
+
+		chrome.runtime.sendMessage({
+			type: 'init',
+			data: {
+				link: window.location.href
+			}
+		}, (response) => {
+
+			RUNTIME.BASE = RUNTIME.URL.parse(window.location.href);
+			RUNTIME.data = response.data;
+			RUNTIME.init = true;
+
+			for (let n = 0, nl = NODES.length; n < nl; n++) {
+
+				process(node);
+
+				NODES.splice(n, 1);
+				nl--;
+				n--;
+
+			}
+
+		});
+
 	});
 
 	new MutationObserver((mutations) => {
 
-		if (RUNTIME.init === false) {
+		if (RUNTIME.init === true) {
 
-			chrome.runtime.sendMessage({
-				type: 'init',
-				data: {
-					link: window.location.href
+			mutations.forEach((mutation) => {
+
+				if (mutation.type === 'childList') {
+
+					Array.from(mutation.addedNodes).filter((node) => {
+						return match(node);
+					}).forEach((node) => {
+						process(node);
+					});
+
 				}
-			}, (response) => {
-
-				RUNTIME.data = response.data;
-				RUNTIME.init = true;
-
-				mutations.forEach((mutation) => {
-
-					if (mutation.type === 'childList') {
-
-						Array.from(mutation.addedNodes).forEach((node) => {
-							process(node);
-						});
-
-					}
-
-				});
 
 			});
 
@@ -258,8 +451,14 @@ const process = window.process = (node) => {
 
 				if (mutation.type === 'childList') {
 
-					Array.from(mutation.addedNodes).forEach((node) => {
-						process(node);
+					Array.from(mutation.addedNodes).filter((node) => {
+						return match(node);
+					}).forEach((node) => {
+
+						if (NODES.includes(node) === false) {
+							NODES.push(node);
+						}
+
 					});
 
 				}

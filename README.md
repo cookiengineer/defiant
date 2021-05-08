@@ -12,56 +12,34 @@ more features to make the website work.
 
 ## Trust Level: Zero
 
-- Disable Requests to known Advertisement Networks.
-- Disable `<frame>`, and `<iframe>`.
-- Disable `<script>` and `<meta http-equiv="refresh">`.
-- Disable Cookies from first-party and second-party domains.
-- Disable Cookies from known CDNs.
-- Disable JavaScript from first-party and second-party domains.
-- Disable JavaScript from known CDNs.
-- Enable CSS from first-party and second-party domains.
-- Enable CSS from known CDNs.
-- Override Cache-related response headers (to force-cache everything).
+- Disable HTTP Location/Refresh redirects.
+- Disable Link Prefetching from all domains.
+- Disable Images from all domains.
+- Disable Frames from all domains.
+- Disable Cookies from all domains.
+- Disable JS from all domains.
+- Enable CSS from first-party or second-party domains or known CDNs.
 
 ## Trust Level: Alpha
 
-- Disable Requests to known Advertisement Networks.
-- Disable `<frame>`, and `<iframe>`.
-- Enable `<script>` and `<meta http-equiv="refresh">`.
-- Enable Cookies from first-party and second-party domains.
-- Disable Cookies from known CDNs.
-- Enable JavaScript from first-party and second-party domains.
-- Enable JavaScript from known CDNs.
-- Enable CSS from first-party and second-party domains.
-- Enable CSS from known CDNs.
-- Override Cache-related response headers (to force-cache everything).
+- Enable Images from first-party or second-party domains or known CDNs.
+- Enable JS from first-party or second-party domains or known CDNs.
 
 ## Trust Level: Beta
 
-- Disable Requests to known Advertisement Networks.
-- Enable `<meta http-equiv="refresh">` to first-party or second-party domains.
-- Enable `<frame>`, and `<iframe>` to first-party or second-party domains.
-- Enable `<script>`
-- Enable Cookies from first-party and second-party domains.
-- Enable Cookies from known CDNs.
-- Enable JavaScript from first-party and second-party domains.
-- Enable JavaScript from known CDNs.
-- Enable CSS from first-party and second-party domains.
-- Enable CSS from known CDNs.
-- Override Cache-related response headers (to force-cache everything).
+- Enable HTTP Location/Refresh redirects to first-party or second-party domains.
+- Enable Link Prefetching to first-party or second-party domains or known CDNs.
+- Enable Images from all domains.
+- Enable Frames from first-party or second-party domains.
+- Enable Cookies from first-party or second-party domains.
 
 ## Trust Level: Gamma
 
-- Enable Requests to known Advertisement Networks.
-- Enable `<frame>`, and `<iframe>`.
-- Enable `<script>` and `<meta http-equiv="refresh">`.
-- Enable Cookies from first-party and second-party domains.
-- Enable Cookies from known CDNs.
-- Enable JavaScript from first-party and second-party domains.
-- Enable JavaScript from known CDNs.
-- Enable CSS from first-party and second-party domains.
-- Enable CSS from known CDNs.
-- Don't Override Cache-related response headers.
+- Enable HTTP Location/Refresh redirects to all domains.
+- Enable Link Prefetching from all domains.
+- Enable Cookies from all domains.
+- Enable JS from all domains.
+- Enable CSS from all domains.
 
 
 ## Development Help
@@ -79,8 +57,8 @@ chromium --user-data-dir=/tmp/defiant chrome://extensions;
 
 ## Acknowledgements
 
-The Chrome Extension Icon is licensed under the CC-BY-SA 3.0
-license; it is itself a modified version that was originally
-created by [Alpar-Etele Meder](https://dribbble.com/Pocike)
-and available via [his Iconfinder Page](https://www.iconfinder.com/pocike).
+This Chrome Extension's [Icon](./defiant/design/icon.svg) is licensed
+under the CC-BY-SA 3.0 license; it is itself a modified variant of the
+icon that was originally created by [Alpar-Etele Meder](https://dribbble.com/Pocike)
+and is available via [his Iconfinder Page](https://www.iconfinder.com/pocike).
 

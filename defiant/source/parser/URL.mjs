@@ -5,8 +5,10 @@ import { IP                                                         } from '../.
 
 
 const CONTENT_DELIVERY_NETWORKS = [
+	'github.githubassets.com',
 	'ajax.googleapis.com',
 	'cdn.jsdelivr.net',
+	'redditstatic.com',
 	'cdn.sstatic.net'
 ];
 

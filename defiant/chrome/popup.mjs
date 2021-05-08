@@ -4,7 +4,7 @@ import { URL     } from '../source/parser/URL.mjs';
 
 
 
-const console = chrome.extension.getBackgroundPage().console || window.console;
+// const console = chrome.extension.getBackgroundPage().console || window.console;
 const DEFIANT = chrome.extension.getBackgroundPage().DEFIANT || null;
 
 const BUTTONS = {
@@ -18,52 +18,39 @@ const ELEMENTS = {
 	level:  Element.query('*[data-key="level"]')
 };
 
-const getURL = (callback) => {
-
-	chrome.tabs.query({
-		active:        true,
-		currentWindow: true
-	}, (tabs) => {
-
-		let tab = tabs[0] || null;
-		if (tab !== null) {
-
-			let url = URL.parse(tab.url);
-			if (URL.isURL(url) === true) {
-				callback(url);
-			} else {
-				callback(null);
-			}
-
-		} else {
-			callback(null);
-		}
-
-	});
-
-};
-
 const update = function(tab) {
 
-	console.log('update', tab);
-
 	if (ELEMENTS.domain !== null) {
-		ELEMENTS.domain.value(tab.url.domain);
+		ELEMENTS.domain.value(URL.toDomain(tab.url));
 	}
 
 	if (ELEMENTS.level !== null) {
 
-		let number = [ 'zero', 'alpha', 'beta', 'gamma' ].indexOf(tab.level);
-		if (number !== -1) {
-			ELEMENTS.level.value(number);
+		if (tab.level !== null) {
+			ELEMENTS.level.value([ 'zero', 'alpha', 'beta', 'gamma' ].indexOf(tab.level.level));
 		} else {
 			ELEMENTS.level.value(0);
 		}
 
-		if (ELEMENTS.info !== null) {
-			ELEMENTS.info.value('Trust Level ' + tab.level);
+	}
+
+	if (ELEMENTS.info !== null) {
+
+		if (tab.level !== null) {
+			ELEMENTS.info.value('Trust Level: ' + tab.level.level);
+		} else {
+			ELEMENTS.info.value('Trust Level: zero');
 		}
 
+	}
+
+	if (
+		tab.url.protocol === 'https'
+		|| tab.url.protocol === 'http'
+	) {
+		BUTTONS.incognito.attr('disabled', false);
+	} else {
+		BUTTONS.incognito.attr('disabled', true);
 	}
 
 };
@@ -76,25 +63,14 @@ if (DEFIANT !== null) {
 
 		BUTTONS.incognito.on('click', () => {
 
-			getURL((url) => {
+			let tab = DEFIANT.tab || null;
+			if (tab !== null) {
 
-				if (url !== null) {
+				chrome.windows.create({
+					incognito: true,
+					url:       URL.render(tab.url)
+				});
 
-					chrome.windows.create({
-						incognito: true,
-						url:       URL.render(url)
-					});
-
-				}
-
-			});
-
-		});
-
-		getURL((url) => {
-
-			if (url === null) {
-				BUTTONS.incognito.attr('disabled', true);
 			}
 
 		});
@@ -141,9 +117,13 @@ if (DEFIANT !== null) {
 				if (level !== null) {
 
 					DEFIANT.setLevel({
-						domain: tab.url.domain,
+						domain: URL.toDomain(tab.url),
 						level:  level
 					});
+
+					if (ELEMENTS.info !== null) {
+						ELEMENTS.info.value('Trust Level: ' + level);
+					}
 
 				}
 
@@ -171,13 +151,7 @@ if (DEFIANT !== null) {
 
 				let tab = DEFIANT.toTab('chrome-' + chrome_tab.id) || null;
 				if (tab !== null) {
-
-					if (DEFIANT.tab !== tab) {
-						DEFIANT.tab = tab;
-					}
-
 					update.call(DEFIANT, tab);
-
 				}
 
 			}

@@ -37,6 +37,26 @@ const Storage = function(settings, defiant, chrome) {
 
 		});
 
+		fetch(this.chrome.runtime.getURL('extern/filters.json')).then((response) => {
+			return response.json();
+		}).then((filters) => {
+
+			if (isArray(filters)) {
+				this.settings.filters = filters;
+			}
+
+		});
+
+		fetch(this.chrome.runtime.getURL('extern/identities.json')).then((response) => {
+			return response.json();
+		}).then((identities) => {
+
+			if (isArray(identities)) {
+				this.settings.identities = identities;
+			}
+
+		});
+
 	}
 
 };
@@ -94,8 +114,16 @@ Storage.prototype = {
 						this.settings.debug = data.debug;
 					}
 
+					if (isObject(data.policies) === true) {
+						this.settings.policies = data.policies;
+					}
+
 					if (isArray(data.levels) === true) {
 						this.settings.levels = data.levels;
+					}
+
+					if (isArray(data.statistics) === true) {
+						this.settings.statistics = data.statistics;
 					}
 
 				}

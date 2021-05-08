@@ -1,4 +1,28 @@
 
+const BANNERS = [
+	'#cookie-banner',
+	'.cookie-banner',
+	'#cookiebanner',
+	'.cookiebanner',
+	'#cookie-consent',
+	'.cookie-consent',
+	'#cookieconsent',
+	'.cookieconsent',
+	'#gdpr-consent',
+	'.gdpr-consent',
+	'#gdprconsent',
+	'.gdprconsent',
+	'#consent',
+	'.consent',
+	'*[aria-label="cookie-banner"]',
+	'*[aria-label="cookiebanner"]',
+	'*[aria-label="cookie-consent"]',
+	'*[aria-label="cookieconsent"]',
+	'*[aria-label="gdpr-consent"]',
+	'*[aria-label="gdprconsent"]',
+	'*[aria-label="consent"]'
+];
+
 const EVENTS = [
 	'abort',
 	'blur',
@@ -83,22 +107,32 @@ EVENTS.forEach((event) => {
 });
 
 
-Array.from(document.querySelectorAll('a[href]')).forEach((link) => {
 
-	let href = link.getAttribute('href');
-	if (
-		href.startsWith('javascript:')
-		|| href === '#'
-	) {
-		link.setAttribute('href', null);
-		link.removeAttribute('href');
-		link.parentNode.removeChild(link);
-	}
+(() => {
 
-});
+	let interval_id = setInterval(() => {
 
+		if (window.RUNTIME.init === true) {
 
-Array.from(document.querySelectorAll('meta, link, frame, iframe, script, a')).forEach((node) => {
-	window.process(node);
-});
+			clearInterval(interval_id);
+			interval_id = null;
+
+			Array.from(document.querySelectorAll('meta, link, frame, iframe, script, a, img, video')).forEach((node) => {
+				window.process(node);
+			});
+
+			BANNERS.forEach((query) => {
+
+				let elements = Array.from(document.querySelectorAll(query));
+				if (elements.length === 1) {
+					elements[0].parentNode.removeChild(elements[0]);
+				}
+
+			});
+
+		}
+
+	}, 16);
+
+})();
 

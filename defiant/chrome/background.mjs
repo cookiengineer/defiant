@@ -7,12 +7,13 @@ import { URL               } from '../source/parser/URL.mjs';
 
 const DEFIANT = new Defiant(null, chrome);
 
-chrome.runtime.onMessage.addListener((request, sender, callback) => {
 
-	let data = null;
+
+chrome.runtime.onMessage.addListener((request, sender, callback) => {
 
 	if (request.type === 'init') {
 
+		let data = null;
 		let link = request.data.link || null;
 
 		if (isString(link) === true) {
@@ -23,18 +24,27 @@ chrome.runtime.onMessage.addListener((request, sender, callback) => {
 			data: data
 		});
 
-	} else if (request.type === 'notification') {
+	} else if (request.type === 'statistics') {
 
-		let link  = request.data.link  || null;
-		let level = request.data.level || null;
-		let type  = request.data.type  || null;
+		let domain = request.data.domain || null;
+		let link   = request.data.link   || null;
+		let level  = request.data.level  || 'zero';
+		let type   = request.data.type   || null;
 
-		if (isString(link) === true) {
+		if (
+			isString(domain) === true
+			&& isString(link) === true
+			&& isString(level) === true
+			&& isString(type) ===  true
+		) {
 
-			DEFIANT.settings.notifications.push({
-				level: level,
-				link:  link,
-				type:  type
+			console.log('report', request.data);
+
+			DEFIANT.settings.statistics.push({
+				domain: domain,
+				level:  level,
+				link:   link,
+				type:   type
 			});
 
 			DEFIANT.storage.save();
@@ -65,6 +75,53 @@ setTimeout(() => {
 			}
 
 		});
+
+	});
+
+	chrome.tabs.onActivated.addListener((info) => {
+
+		chrome.tabs.get(info.tabId, (chrome_tab) => {
+
+			let tab = DEFIANT.toTab('chrome-' + chrome_tab.id);
+			if (tab !== null) {
+				DEFIANT.tab = tab;
+			}
+
+		});
+
+	});
+
+	chrome.tabs.onUpdated.addListener((tab_id, changes) => {
+
+		if (typeof changes.url === 'string') {
+
+			let url = URL.parse(changes.url);
+			if (URL.isURL(url) === true) {
+
+				let tab = DEFIANT.toTab('chrome-' + tab_id);
+				if (tab !== null) {
+					tab.level = DEFIANT.toLevel(url);
+					tab.url   = url;
+				}
+
+			}
+
+		}
+
+	});
+
+	chrome.tabs.onRemoved.addListener((tab_id) => {
+
+		for (let t = 0, tl = DEFIANT.tabs.length; t < tl; t++) {
+
+			let tab = DEFIANT.tabs[t];
+			if (tab.id === 'chrome-' + tab_id) {
+				DEFIANT.tabs.splice(t, 1);
+				tl--;
+				t--;
+			}
+
+		}
 
 	});
 
