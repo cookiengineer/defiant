@@ -4,14 +4,6 @@ import { IP                                                         } from '../.
 
 
 
-const CONTENT_DELIVERY_NETWORKS = [
-	'github.githubassets.com',
-	'ajax.googleapis.com',
-	'cdn.jsdelivr.net',
-	'redditstatic.com',
-	'cdn.sstatic.net'
-];
-
 const TOPLEVELDOMAINS = [
 	'aba.ae',
 	'ac.id',
@@ -673,30 +665,6 @@ const URL = {
 
 
 		return null;
-
-	},
-
-	isCDN: function(absolute) {
-
-		let url_absolute = null;
-
-		if (isString(absolute) === true) {
-			url_absolute = URL.parse(absolute);
-		} else if (URL.isURL(absolute) === true) {
-			url_absolute = absolute;
-		}
-
-		if (url_absolute !== null) {
-
-			let domain = URL.toDomain(url_absolute);
-			if (CONTENT_DELIVERY_NETWORKS.includes(domain) === true) {
-				return true;
-			}
-
-		}
-
-
-		return false;
 
 	},
 

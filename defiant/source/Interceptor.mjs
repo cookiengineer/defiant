@@ -1,13 +1,9 @@
 
-import { console, Emitter, isNumber, isObject, isString } from '../extern/base.mjs';
+import { console, Emitter, isArray, isNumber, isObject, isString } from '../extern/base.mjs';
 import { isDefiant                             } from '../source/Defiant.mjs';
 import { URL                                   } from '../source/parser/URL.mjs';
 
 
-
-const BYPASS = {
-	'mannheimer-morgen.de': 'Googlebot/2.1 (+http://www.google.com/bot.html)'
-};
 
 export const isInterceptor = function(obj) {
 	return Object.prototype.toString.call(obj) === '[object Interceptor]';
@@ -86,8 +82,9 @@ const Interceptor = function(settings, defiant, chrome) {
 
 	this.__state.listeners['request'] = (details) => {
 
-		let url = URL.parse(details.url);
-		let tab = null;
+		let url        = URL.parse(details.url);
+		let url_domain = URL.toDomain(url);
+		let tab        = null;
 
 		if (isNumber(details.tabId) === true) {
 			tab = this.defiant.toTab('chrome-' + details.tabId);
@@ -113,9 +110,9 @@ const Interceptor = function(settings, defiant, chrome) {
 
 			if (level === 'zero' || level === 'alpha' || level === 'beta') {
 
-				if (URL.isDomain(domain, URL.toDomain(url)) === true) {
+				if (this.defiant.isDomain(domain, url_domain) === true) {
 					blocked = false;
-				} else if (URL.isCDN(URL.toDomain(url)) === true) {
+				} else if (this.defiant.isCDN(url_domain) === true) {
 					blocked = false;
 				} else {
 					report  = true;
@@ -137,9 +134,9 @@ const Interceptor = function(settings, defiant, chrome) {
 				blocked = true;
 			} else if (level === 'alpha' || level === 'beta') {
 
-				if (URL.isDomain(domain, URL.toDomain(url)) === true) {
+				if (this.defiant.isDomain(domain, url_domain) === true) {
 					blocked = false;
-				} else if (URL.isCDN(URL.toDomain(url)) === true) {
+				} else if (this.defiant.isCDN(url_domain) === true) {
 					blocked = false;
 				} else {
 					report  = true;
@@ -162,18 +159,9 @@ const Interceptor = function(settings, defiant, chrome) {
 
 		if (blocked === false) {
 
-			let blockers = this.defiant.settings.blockers;
-
-			for (let b = 0, bl = blockers.length; b < bl; b++) {
-
-				let blocker = blockers[b];
-
-				if (URL.isDomain(blocker.domain, URL.toDomain(url)) === true) {
-					report  = true;
-					blocked = true;
-					break;
-				}
-
+			if (this.defiant.isBlocked(url_domain) === true) {
+				report  = true;
+				blocked = true;
 			}
 
 		}
@@ -199,8 +187,9 @@ const Interceptor = function(settings, defiant, chrome) {
 
 	this.__state.listeners['filter-request-headers'] = (details) => {
 
-		let url = URL.parse(details.url);
-		let tab = null;
+		let url        = URL.parse(details.url);
+		let url_domain = URL.toDomain(url);
+		let tab        = null;
 
 		if (isNumber(details.tabId) === true) {
 			tab = this.defiant.toTab('chrome-' + details.tabId);
@@ -267,13 +256,34 @@ const Interceptor = function(settings, defiant, chrome) {
 		]);
 
 
-		let bypass = BYPASS[url.domain] || null;
-		if (bypass !== null) {
+		let identity = this.defiant.toIdentity(url_domain);
+		if (identity !== null) {
 
-			details.requestHeaders.push({
-				name:  'user-agent',
-				value: bypass
-			});
+			if (isString(identity['user-agent']) === true) {
+
+				details.requestHeaders.push({
+					name:  'user-agent',
+					value: identity['user-agent']
+				});
+
+			}
+
+			if (isArray(identity['cookies']) === true) {
+
+				identity['cookies'].forEach((cookie) => {
+
+					if (isString(cookie) === true) {
+
+						details.requestHeaders.push({
+							name:  'cookie',
+							value: cookie
+						});
+
+					}
+
+				});
+
+			}
 
 		}
 
@@ -311,20 +321,25 @@ const Interceptor = function(settings, defiant, chrome) {
 
 		} else if (level === 'beta') {
 
-			let redirect = null;
-			let content  = toValue(details.responseHeaders, 'content-location');
-			let location = toValue(details.responseHeaders, 'location');
-			let refresh  = toValue(details.responseHeaders, 'refresh');
+			let redirect        = null;
+			let redirect_domain = null;
+			let content         = toValue(details.responseHeaders, 'content-location');
+			let location        = toValue(details.responseHeaders, 'location');
+			let refresh         = toValue(details.responseHeaders, 'refresh');
 
 			if (location !== null) {
-				redirect = URL.parse(location);
+				redirect        = URL.parse(location);
+				redirect_domain = URL.toDomain(redirect);
 			} else if (refresh !== null) {
-				redirect = URL.parse(refresh.split('; url=').pop());
+				redirect        = URL.parse(refresh.split('; url=').pop());
+				redirect_domain = URL.toDomain(redirect);
 			} else if (content !== null) {
-				redirect = URL.parse(content);
+				redirect        = URL.parse(content);
+				redirect_domain = URL.toDomain(redirect);
 			}
 
-			if (URL.isDomain(domain, URL.toDomain(redirect)) === true) {
+
+			if (this.defiant.isDomain(domain, redirect_domain) === true) {
 				// Do Nothing
 			} else {
 

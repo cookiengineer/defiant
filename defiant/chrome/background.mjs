@@ -11,20 +11,28 @@ const DEFIANT = new Defiant(null, chrome);
 
 chrome.runtime.onMessage.addListener((request, sender, callback) => {
 
-	if (request.type === 'init') {
+	if (request.type === 'content-init') {
 
-		let data = null;
-		let link = request.data.link || null;
+		let settings = {
+			distributors: DEFIANT.settings.distributors,
+			levels:       []
+		};
 
-		if (isString(link) === true) {
-			data = DEFIANT.toLevel(URL.parse(link));
+		let level = null;
+
+		if (isString(request.data.link) === true) {
+			level = DEFIANT.toLevel(URL.parse(request.data.link));
+		}
+
+		if (level !== null) {
+			settings.levels.push(level);
 		}
 
 		callback({
-			data: data
+			settings: settings
 		});
 
-	} else if (request.type === 'statistics') {
+	} else if (request.type === 'content-report') {
 
 		let domain = request.data.domain || null;
 		let link   = request.data.link   || null;
@@ -82,9 +90,13 @@ setTimeout(() => {
 
 		chrome.tabs.get(info.tabId, (chrome_tab) => {
 
-			let tab = DEFIANT.toTab('chrome-' + chrome_tab.id);
-			if (tab !== null) {
-				DEFIANT.tab = tab;
+			if (chrome_tab !== undefined) {
+
+				let tab = DEFIANT.toTab('chrome-' + chrome_tab.id);
+				if (tab !== null) {
+					DEFIANT.tab = tab;
+				}
+
 			}
 
 		});

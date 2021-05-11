@@ -13,6 +13,25 @@ export const isStorage = function(obj) {
 
 
 
+const includes = (array, item) => {
+
+	let result = false;
+
+	for (let a = 0, al = array.length; a < al; a++) {
+
+		if (array[a].domain === item.domain) {
+			result = true;
+			break;
+		}
+
+	}
+
+	return result;
+
+};
+
+
+
 const Storage = function(settings, defiant, chrome) {
 
 	settings = isObject(settings)   ? settings : {};
@@ -31,7 +50,7 @@ const Storage = function(settings, defiant, chrome) {
 			return response.json();
 		}).then((blockers) => {
 
-			if (isArray(blockers)) {
+			if (isArray(blockers) === true) {
 				this.settings.blockers = blockers;
 			}
 
@@ -41,8 +60,26 @@ const Storage = function(settings, defiant, chrome) {
 			return response.json();
 		}).then((filters) => {
 
-			if (isArray(filters)) {
+			if (isArray(filters) === true) {
 				this.settings.filters = filters;
+			}
+
+		});
+
+		fetch(this.chrome.runtime.getURL('extern/distributors.json')).then((response) => {
+			return response.json();
+		}).then((distributors) => {
+
+			if (isArray(distributors) === true) {
+
+				distributors.forEach((distributor) => {
+
+					if (includes(this.settings.distributors, distributor) === false) {
+						this.settings.distributors.push(distributor);
+					}
+
+				});
+
 			}
 
 		});
@@ -51,8 +88,16 @@ const Storage = function(settings, defiant, chrome) {
 			return response.json();
 		}).then((identities) => {
 
-			if (isArray(identities)) {
-				this.settings.identities = identities;
+			if (isArray(identities) === true) {
+
+				identities.forEach((identity) => {
+
+					if (includes(this.settings.identities, identity) === false) {
+						this.settings.identities.push(identity);
+					}
+
+				});
+
 			}
 
 		});
@@ -118,8 +163,28 @@ Storage.prototype = {
 						this.settings.policies = data.policies;
 					}
 
+					if (isArray(data.distributors) === true) {
+
+						data.distributors.forEach((distributor) => {
+
+							if (includes(this.settings.distributors, distributor) === false) {
+								this.settings.distributors.push(distributor);
+							}
+
+						});
+
+					}
+
 					if (isArray(data.levels) === true) {
-						this.settings.levels = data.levels;
+
+						data.levels.forEach((level) => {
+
+							if (includes(this.settings.levels, level) === false) {
+								this.settings.levels.push(level);
+							}
+
+						});
+
 					}
 
 					if (isArray(data.statistics) === true) {

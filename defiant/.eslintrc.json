@@ -18,6 +18,15 @@
 		"rules": {
 			"no-undef": "off"
 		}
+	}, {
+		"files": [ "content/block.mjs" ],
+		"rules": {
+			"no-unused-vars": [
+				"error", {
+					"varsIgnorePattern": "^(DEFIANT|isArray|isBoolean|isBuffer|isFunction|isNumber|isObject|isString)$"
+				}
+			]
+		}
 	}],
 	"rules": {
 		"no-restricted-globals": [

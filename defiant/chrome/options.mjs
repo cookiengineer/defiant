@@ -10,8 +10,9 @@ const console    = window.console;
 const DEFIANT    = chrome.extension.getBackgroundPage().DEFIANT || null;
 const STATISTICS = {};
 const TABLES     = {
-	'statistics': Element.query('section#statistics table tbody'),
-	'levels':     Element.query('section#levels table tbody')
+	'distributors': Element.query('section#distributors table tbody'),
+	'levels':       Element.query('section#levels table tbody'),
+	'statistics':   Element.query('section#statistics table tbody')
 };
 
 
@@ -31,28 +32,91 @@ if (DEFIANT !== null) {
 					stats = STATISTICS[report.domain] = {
 						domain:  report.domain,
 						level:   report.level,
-						blocked: 1
+						blocked: [{
+							link: report.link,
+							type: report.type
+						}]
 					};
 				} else {
-					stats.blocked++;
+
+					let check = stats.blocked.find((o) => o.link === report.link) || null;
+					if (check === null) {
+
+						stats.blocked.push({
+							link: report.link,
+							type: report.type
+						});
+
+					}
+
 				}
 
 			});
 
 			Object.values(STATISTICS).sort((a, b) => {
-				if (a.blocked > b.blocked) return -1;
-				if (b.blocked > a.blocked) return  1;
+				if (a.blocked.length > b.blocked.length) return -1;
+				if (b.blocked.length > a.blocked.length) return  1;
 				return 0;
 			}).map((report) => {
 
-				return new Element('tr', [
+				let element = new Element('tr', [
 					'<td data-key="domain">' + report.domain + '</td>',
 					'<td data-key="level">' + report.level + '</td>',
-					'<td data-key="blocked">' + report.blocked + ' requests</td>'
+					'<td data-key="blocked">' + report.blocked.length + ' items</td>'
 				]);
 
-			}).forEach((element) => {
-				element.render(TABLES['statistics']);
+				let details = new Element('tr', [
+					'<td colspan="3">',
+					'\t<table>',
+					'\t\t<thead>',
+					'\t\t\t<tr>',
+					'\t\t\t\t<th>Type</th>',
+					'\t\t\t\t<th>Data</th>',
+					'\t\t\t</tr>',
+					'\t\t</thead>',
+					'\t\t<tbody>',
+					'\t\t</tbody>',
+					'\t</table>',
+					'</td>'
+				]);
+
+				let table = details.query('tbody');
+				if (table !== null) {
+
+					report.blocked.map((data) => {
+
+						return new Element('tr', [
+							'<td>' + data.type + '</td>',
+							'<td title="' + data.link + '">' + data.link + '</td>'
+						]);
+
+					}).forEach((element) => {
+						element.render(table);
+					});
+
+				}
+
+				details.attr('data-visible', 'false');
+
+				element.on('click', () => {
+
+					let visible = details.attr('data-visible');
+					if (visible === true) {
+						details.attr('data-visible', false);
+					} else {
+						details.attr('data-visible', true);
+					}
+
+				});
+
+				return [ element, details ];
+
+			}).forEach((elements) => {
+
+				elements.forEach((element) => {
+					element.render(TABLES['statistics']);
+				});
+
 			});
 
 		} else {
@@ -84,9 +148,7 @@ if (DEFIANT !== null) {
 				return new Element('tr', [
 					'<td data-key="domain">' + level.domain + '</td>',
 					'<td data-key="level">' + level.level + '</td>',
-					'<td>',
-					'\t<button data-action="remove"></button>',
-					'</td>'
+					'<td><button data-action="remove"></button></td>'
 				]);
 
 			}).forEach((element) => {
@@ -125,10 +187,54 @@ if (DEFIANT !== null) {
 
 	}
 
+	if (isArray(DEFIANT.settings.distributors) === true) {
 
+		if (DEFIANT.settings.distributors.length > 0) {
 
-	// TODO: Render Options Page and integrate change events
-	console.log(DEFIANT.settings);
+			TABLES['distributors'].query('*', true).forEach((element) => element.erase());
+
+			DEFIANT.settings.distributors.sort((a, b) => {
+
+				let a_url = URL.parse('https://' + a.domain);
+				let b_url = URL.parse('https://' + b.domain);
+
+				return URL.compare(a_url, b_url);
+
+			}).map((level) => {
+
+				return new Element('tr', [
+					'<td data-key="domain">' + level.domain + '</td>',
+					'<td><button data-action="remove"></button></td>'
+				]);
+
+			}).forEach((element) => {
+
+				let button = element.query('[data-action="remove"]');
+				let domain = element.query('[data-key="domain"]');
+
+				if (button !== null && domain !== null) {
+
+					button.on('click', () => {
+
+						let found = DEFIANT.settings.distributors.find((d) => d.domain === domain.value());
+						if (found !== null) {
+							DEFIANT.settings.distributors.remove(found);
+							DEFIANT.storage.save();
+						}
+
+						element.erase();
+
+					});
+
+				}
+
+				element.render(TABLES['distributors']);
+
+			});
+
+		}
+
+	}
 
 }
 

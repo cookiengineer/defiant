@@ -50,6 +50,10 @@ table tr td {
 	line-height: 32px;
 }
 
+table tr[data-visible="false"] {
+	display: none;
+}
+
 table tr:nth-of-type(2n) td {
 	background: rgba(255,255,255,0.1);
 }
@@ -63,11 +67,12 @@ table tr:nth-of-type(2n) td {
 table tbody td[colspan] {
 	height: 64px;
 	line-height: 64px;
-	text-align: center;
 }
 
-table tbody td[colspan].loading {
-	animation: pulsating 2s ease-in-out infinite;
+table > tbody > tr > td[colspan].loading,
+section article > table > tbody > tr > td[colspan].loading {
+	text-align: center !important;
+	animation: pulsating 2s ease-in-out infinite !important;
 }
 
 ul {
@@ -116,28 +121,76 @@ section article {
 	overflow: hidden auto;
 }
 
-section#statistics article table tr th:nth-of-type(2),
-section#statistics article table tr td:nth-of-type(2) {
-	width: 8em;
+
+
+section#statistics article > table > thead > tr > th:nth-of-type(1) {
+	width: 60%;
 	text-align: center;
 }
 
-section#statistics article table tr th:nth-of-type(3),
-section#statistics article table tr td:nth-of-type(3) {
-	width: 10em;
+section#statistics article > table > tbody > tr > td:nth-of-type(1) {
+	width: 60%;
+	text-align: left;
+}
+
+section#statistics article > table > thead > tr > th:nth-of-type(2),
+section#statistics article > table > tbody > tr > td:nth-of-type(2) {
+	width: 20%;
 	text-align: center;
 }
 
-section#levels article table tr th:nth-of-type(2),
-section#levels article table tr td:nth-of-type(2) {
-	width: 8em;
+section#statistics article > table > thead > tr > th:nth-of-type(3),
+section#statistics article > table > tbody > tr > td:nth-of-type(3) {
+	width: 20%;
 	text-align: center;
 }
 
-section#levels article table tr th:nth-of-type(3),
-section#levels article table tr td:nth-of-type(3) {
+section#statistics article > table > tbody > tr > td[colspan] > table > thead > tr > th:nth-of-type(1),
+section#statistics article > table > tbody > tr > td[colspan] > table > tbody > tr > td:nth-of-type(1) {
+	width: 20%;
+	text-align: center;
+}
+
+section#statistics article > table > tbody > tr > td[colspan] > table > thead > tr > th:nth-of-type(2) {
+	width: 80%;
+	text-align: center;
+}
+
+section#statistics article > table > tbody > tr > td[colspan] > table > tbody > tr > td:nth-of-type(2) {
+	width: 80%;
+	text-align: left;
+	text-overflow: ellipsis;
+	white-space: pre;
+	overflow: hidden;
+}
+
+section#levels article > table > thead > tr > th:nth-of-type(2),
+section#levels article > table > tbody > tr > td:nth-of-type(2) {
+	width: 20%;
+	text-align: center;
+}
+
+section#levels article > table > thead > tr > th:nth-of-type(3),
+section#levels article > table > tbody > tr > td:nth-of-type(3) {
 	width: 32px;
 }
+
+section#distributors article > table > thead > tr > th:nth-of-type(1) {
+	width: calc(100% - 32px);
+	text-align: center;
+}
+
+section#distributors article > table > tbody > tr > td:nth-of-type(1) {
+	width: calc(100% - 32px);
+	text-align: left;
+}
+
+section#distributors article > table > thead > tr > th:nth-of-type(2),
+section#distributors article > table > tbody > tr > td:nth-of-type(2) {
+	width: 32px;
+}
+
+
 
 button[data-action="remove"]:before      { content: '\e14c'; }
 input[type="radio"][value="none"]:before { content: '\e14c'; }
@@ -155,3 +208,4 @@ input[type="radio"][value="date"]:before { content: '\e916'; }
 	}
 
 }
+

@@ -38,9 +38,10 @@ const Defiant = function(settings, chrome) {
 	this.settings = Object.assign({
 
 		// Extension Data
-		blockers:   [],
-		filters:    [],
-		identities: [],
+		blockers:     [],
+		distributors: [],
+		filters:      [],
+		identities:   [],
 
 		// User Settings
 		debug:      false,
@@ -51,6 +52,8 @@ const Defiant = function(settings, chrome) {
 		statistics: []
 
 	}, settings);
+
+	this.__cache = {};
 
 	this.interceptor = new Interceptor(this.settings, this, chrome);
 	this.storage     = new Storage(this.settings, this, chrome);
@@ -229,6 +232,129 @@ Defiant.prototype = Object.assign({}, Emitter.prototype, {
 
 
 		return null;
+
+	},
+
+	toIdentity: function(domain) {
+
+		domain = isString(domain) ? domain : null;
+
+
+		if (domain !== null) {
+
+			let cache = this.__cache[domain] || null;
+			if (cache === null) {
+
+				let blocker     = this.settings.blockers.find((b) => this.isDomain(b.domain, domain))   || null;
+				let identity    = this.settings.identities.find((i) => this.isDomain(i.domain, domain)) || null;
+				let level       = this.settings.levels.find((l) => l.domain === domain)                 || null;
+				let distributor = this.settings.distributors.find((d) => d.domain === domain)           || null;
+
+				cache = this.__cache[domain] = {
+					level:     level,
+					identity:  identity,
+					isBlocked: blocker !== null,
+					isCDN:     distributor !== null
+				};
+
+			}
+
+
+			return cache.identity;
+
+		}
+
+
+		return false;
+
+	},
+
+	isBlocked: function(domain) {
+
+		domain = isString(domain) ? domain : null;
+
+
+		if (domain !== null) {
+
+			let cache = this.__cache[domain] || null;
+			if (cache === null) {
+
+				let blocker     = this.settings.blockers.find((b) => this.isDomain(b.domain, domain))   || null;
+				let identity    = this.settings.identities.find((i) => this.isDomain(i.domain, domain)) || null;
+				let level       = this.settings.levels.find((l) => l.domain === domain)                 || null;
+				let distributor = this.settings.distributors.find((d) => d.domain === domain)           || null;
+
+				cache = this.__cache[domain] = {
+					level:     level,
+					identity:  identity,
+					isBlocked: blocker !== null,
+					isCDN:     distributor !== null
+				};
+
+			}
+
+
+			return cache.isBlocked === true;
+
+		}
+
+
+		return false;
+
+	},
+
+	isDomain: function(domain, other) {
+
+		domain = isString(domain) ? domain : null;
+		other  = isString(other)  ? other  : null;
+
+		if (domain !== null && other !== null) {
+
+			if (
+				other === domain
+				|| other.endsWith('.' + domain) === true
+			) {
+				return true;
+			}
+
+		}
+
+
+		return false;
+
+	},
+
+	isCDN: function(domain) {
+
+		domain = isString(domain) ? domain : null;
+
+
+		if (domain !== null) {
+
+			let cache = this.__cache[domain] || null;
+			if (cache === null) {
+
+				let blocker     = this.settings.blockers.find((b) => this.isDomain(b.domain, domain))   || null;
+				let identity    = this.settings.identities.find((i) => this.isDomain(i.domain, domain)) || null;
+				let level       = this.settings.levels.find((l) => l.domain === domain)                 || null;
+				let distributor = this.settings.distributors.find((d) => d.domain === domain)           || null;
+
+				cache = this.__cache[domain] = {
+					level:     level,
+					identity:  identity,
+					isBlocked: blocker !== null,
+					isCDN:     distributor !== null
+				};
+
+			}
+
+
+			return cache.isCDN === true;
+
+		}
+
+
+		return false;
 
 	}
 
