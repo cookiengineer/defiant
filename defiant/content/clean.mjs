@@ -1,138 +1,151 @@
 
-const BANNERS = [
-	'#cookie-banner',
-	'.cookie-banner',
-	'#cookiebanner',
-	'.cookiebanner',
-	'#cookie-consent',
-	'.cookie-consent',
-	'#cookieconsent',
-	'.cookieconsent',
-	'#gdpr-consent',
-	'.gdpr-consent',
-	'#gdprconsent',
-	'.gdprconsent',
-	'#consent',
-	'.consent',
-	'*[aria-label="cookie-banner"]',
-	'*[aria-label="cookiebanner"]',
-	'*[aria-label="cookie-consent"]',
-	'*[aria-label="cookieconsent"]',
-	'*[aria-label="gdpr-consent"]',
-	'*[aria-label="gdprconsent"]',
-	'*[aria-label="consent"]'
-];
+setTimeout(() => {
 
-const EVENTS = [
-	'abort',
-	'blur',
-	'cancel',
-	'canplay',
-	'canplaythrough',
-	'change',
-	'click',
-	'close',
-	'contextmenu',
-	'cuechange',
-	'dblclick',
-	'durationchange',
-	'ended',
-	'error',
-	'focus',
-	'gotpointercapture',
-	'input',
-	'invalid',
-	'keydown',
-	'keypress',
-	'keyup',
-	'load',
-	'loadedmetadata',
-	'loadend',
-	'loadstart',
-	'lostpointercapture',
-	'mousedown',
-	'mouseenter',
-	'mouseleave',
-	'mousemove',
-	'mouseout',
-	'mouseover',
-	'mouseup',
-	'pause',
-	'play',
-	'playing',
-	'pointercancel',
-	'pointerdown',
-	'pointerenter',
-	'pointerleave',
-	'pointermove',
-	'pointerout',
-	'pointerover',
-	'pointerup',
-	'reset',
-	'resize',
-	'scroll',
-	'select',
-	'selectionchange',
-	'selectstart',
-	'submit',
-	'touchcancel',
-	'touchstart',
-	'transitioncancel',
-	'transitionend',
-	'wheel'
-];
+	let EVENTS = [
+		'abort',
+		'blur',
+		'cancel',
+		'canplay',
+		'canplaythrough',
+		'change',
+		'click',
+		'close',
+		'contextmenu',
+		'cuechange',
+		'dblclick',
+		'durationchange',
+		'ended',
+		'error',
+		'focus',
+		'gotpointercapture',
+		'input',
+		'invalid',
+		'keydown',
+		'keypress',
+		'keyup',
+		'load',
+		'loadedmetadata',
+		'loadend',
+		'loadstart',
+		'lostpointercapture',
+		'mousedown',
+		'mouseenter',
+		'mouseleave',
+		'mousemove',
+		'mouseout',
+		'mouseover',
+		'mouseup',
+		'pause',
+		'play',
+		'playing',
+		'pointercancel',
+		'pointerdown',
+		'pointerenter',
+		'pointerleave',
+		'pointermove',
+		'pointerout',
+		'pointerover',
+		'pointerup',
+		'reset',
+		'resize',
+		'scroll',
+		'select',
+		'selectionchange',
+		'selectstart',
+		'submit',
+		'touchcancel',
+		'touchstart',
+		'transitioncancel',
+		'transitionend',
+		'wheel'
+	];
 
+	let level = 'zero';
 
+	if (window.ORIGIN !== undefined && window.ORIGIN.level !== null) {
+		level = window.ORIGIN.level.level;
+	}
 
-EVENTS.forEach((event) => {
+	if (level === 'zero') {
 
-	let nodes = Array.from(document.querySelectorAll('*[on' + event + ']'));
-	if (nodes.length > 0) {
+		EVENTS.forEach((event) => {
 
-		nodes.forEach((node) => {
+			let nodes = Array.from(document.querySelectorAll('*[on' + event + ']'));
+			if (nodes.length > 0) {
 
-			node.setAttribute('on' + event, null);
-			node.removeAttribute('on' + event);
+				nodes.forEach((node) => {
 
-			node['on' + event] = null;
+					node.setAttribute('on' + event, null);
+					node.removeAttribute('on' + event);
 
-			setTimeout(() => {
-				node.replaceWith(node.cloneNode(true));
-			}, 0);
+					node['on' + event] = null;
+
+					setTimeout(() => {
+						node.replaceWith(node.cloneNode(true));
+					}, 0);
+
+				});
+
+			}
 
 		});
 
 	}
 
-});
+}, 100);
 
 
 
-(() => {
+setTimeout(() => {
 
-	let interval_id = setInterval(() => {
+	let BANNERS = [
 
-		if (window.RUNTIME.init === true) {
+		'#cookie-banner',
+		'.cookie-banner',
+		'*[aria-label="cookie-banner"]',
 
-			clearInterval(interval_id);
-			interval_id = null;
+		'#cookiebanner',
+		'.cookiebanner',
+		'*[aria-label="cookiebanner"]',
 
-			Array.from(document.querySelectorAll('meta, link, frame, iframe, script, a, img, video')).forEach((node) => {
-				window.process(node);
-			});
+		'#cookie-consent',
+		'.cookie-consent',
+		'*[aria-label="cookie-consent"]',
 
-			BANNERS.forEach((query) => {
+		'#cookieconsent',
+		'.cookieconsent',
+		'*[aria-label="cookieconsent"]',
 
-				let elements = Array.from(document.querySelectorAll(query));
-				if (elements.length === 1) {
-					elements[0].parentNode.removeChild(elements[0]);
-				}
+		'#consent',
+		'.consent',
+		'*[aria-label="consent"]',
 
-			});
+		'#gdpr-consent',
+		'.gdpr-consent',
+		'*[aria-label="gdpr-consent"]',
 
+		'#gdprconsent',
+		'.gdprconsent',
+		'*[aria-label="gdprconsent"]',
+
+		'#sticky-banner',
+		'.sticky-banner',
+		'*[aria-label="sticky-banner"]',
+
+		'#stickybanner',
+		'.stickybanner',
+		'*[aria-label="stickybanner"]'
+
+	];
+
+	BANNERS.forEach((query) => {
+
+		let elements = Array.from(document.querySelectorAll(query));
+		if (elements.length === 1) {
+			elements[0].parentNode.removeChild(elements[0]);
 		}
 
-	}, 16);
+	});
 
-})();
+}, 200);
 
