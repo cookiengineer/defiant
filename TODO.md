@@ -1,8 +1,7 @@
 
 # TODO
 
-- [ ] URL.render() and url.link properties don't contain the trailing `#hash`, which is
-      a problem with the current content block script
+- [ ] Embed URL Parser and IP Parser into content/block script, via make.mjs
 
 - [ ] Add support for generation of `Content-Security-Policy` to `Interceptor.mjs` based on Trust Level.
 
