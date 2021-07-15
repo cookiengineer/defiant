@@ -27,6 +27,8 @@ span[data-key="info"] {
 	width: 100%;
 	margin: 0px;
 	padding: 0px;
+	font-size: 12px;
+	white-space: pre;
 }
 
 button[data-action="incognito"]:before {
@@ -40,7 +42,7 @@ button[data-action="options"]:before {
 header,
 footer {
 	display: block;
-	width: 200px;
+	width: 248px;
 	height: auto;
 	margin: 0px;
 	padding: 0px;
@@ -52,7 +54,7 @@ footer {
 }
 
 footer {
-	margin: 16px 0px 0px 0px;
+	margin: 8px 0px 0px 0px;
 	text-align: right;
 }
 

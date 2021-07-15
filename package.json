@@ -1,0 +1,12 @@
+{
+	"name": "defiant",
+	"description": "Defiant - Chrome/Chromium Browser Extension for increased Privacy",
+	"private": true,
+	"version": "2021.07",
+	"scripts": {
+		"build": "node ./build.mjs"
+	},
+	"devDependencies": {
+		"esbuild": "^0.12.15"
+	}
+}

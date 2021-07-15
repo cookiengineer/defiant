@@ -37,9 +37,19 @@ const update = function(tab) {
 	if (ELEMENTS.info !== null) {
 
 		if (tab.level !== null) {
-			ELEMENTS.info.value('Trust Level: ' + tab.level.level);
+
+			if (tab.level.level === 'zero') {
+				ELEMENTS.info.value('Zero: Maximum Security');
+			} else if (tab.level.level === 'alpha') {
+				ELEMENTS.info.value('Alpha: Interactive Website');
+			} else if (tab.level.level === 'beta') {
+				ELEMENTS.info.value('Beta: Media + Frames + Cookies');
+			} else if (tab.level.level === 'gamma') {
+				ELEMENTS.info.value('Gamma: Web App');
+			}
+
 		} else {
-			ELEMENTS.info.value('Trust Level: zero');
+			ELEMENTS.info.value('Zero: Maximum Security');
 		}
 
 	}
@@ -116,14 +126,24 @@ if (DEFIANT !== null) {
 				let level = [ 'zero', 'alpha', 'beta', 'gamma' ][value] || null;
 				if (level !== null) {
 
+					if (ELEMENTS.info !== null) {
+
+						if (level === 'zero') {
+							ELEMENTS.info.value('Zero: Maximum Security');
+						} else if (level === 'alpha') {
+							ELEMENTS.info.value('Alpha: Interactive Website');
+						} else if (level === 'beta') {
+							ELEMENTS.info.value('Beta: Media + Frames + Cookies');
+						} else if (level === 'gamma') {
+							ELEMENTS.info.value('Gamma: Web App');
+						}
+
+					}
+
 					DEFIANT.setLevel({
 						domain: URL.toDomain(tab.url),
 						level:  level
 					});
-
-					if (ELEMENTS.info !== null) {
-						ELEMENTS.info.value('Trust Level: ' + level);
-					}
 
 				}
 

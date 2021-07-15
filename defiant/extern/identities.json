@@ -1,5 +1,17 @@
 [
 	{
+		"domain": "google.com",
+		"cookies": [
+			"CONSENT=YES+cb.20210618-11-p0.en+FX+953; Domain=google.com; Path=/; secure"
+		]
+	},
+	{
+		"domain": "google.de",
+		"cookies": [
+			"CONSENT=YES+cb.20210618-11-p0.en+FX+156; Domain=google.de; Path=/; secure"
+		]
+	},
+	{
 		"domain": "mannheimer-morgen.de",
 		"user-agent": "Googlebot/2.1 (+http://www.google.com/bot.html)"
 	},
@@ -11,6 +23,12 @@
 		"domain": "reddit.com",
 		"cookies": [
 			"over18=1; Domain=reddit.com; Path=/; secure"
+		]
+	},
+	{
+		"domain": "youtube.com",
+		"cookies": [
+			"CONSENT=YES+cb.20210618-11-p0.en+FX+263; Domain=google.de; Path=/; secure"
 		]
 	}
 ]
