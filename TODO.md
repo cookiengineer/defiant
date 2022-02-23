@@ -1,4 +1,9 @@
 
+# Tracking Links
+
+- [ ] Google Search uses `https://www.google.com/url?q=...` scheme to generate redirects
+- [ ] Clean URLs from social media tracking parameters (e.g. `?utm=...`)
+
 # Build Script
 
 - [ ] Build the extension for Chromium
@@ -8,10 +13,6 @@
 # TODO
 
 - [ ] Add support for generation of `Content-Security-Policy` to `Interceptor.mjs` based on Trust Level.
-
-- [ ] Evaluate usefulness of `chrome.privacy.websites.hyperlinkAuditingEnabled.set({ value: false })`
-- [ ] Evaluate usefulness of `chrome.privacy.websites.referrersEnabled.set({ value: false })`
-- [ ] Evaluate usefulness of `chrome.privacy.websites.thirdPartyCookiesAllowed.set({ value: false })`
 
 ## CSS Filters
 
