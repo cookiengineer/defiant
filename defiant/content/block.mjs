@@ -34,8 +34,6 @@ const NX74205 = window.NX74205 = (function() {
 			levels:       []
 		};
 
-		this.__cache = {};
-
 	};
 
 
@@ -89,6 +87,42 @@ const NX74205 = window.NX74205 = (function() {
 
 		},
 
+		toLevel: function(domain) {
+
+			domain = isString(domain) ? domain : null;
+
+
+			if (domain !== null) {
+
+				let levels = this.settings.levels.filter((l) => URL.isDomain(l.domain, domain));
+				if (levels.length > 1) {
+
+					return levels.sort((a, b) => {
+						if (a.domain.length > b.domain.length) return -1;
+						if (b.domain.length > a.domain.length) return  1;
+						return 0;
+					})[0];
+
+				} else if (levels.length === 1) {
+
+					return levels[0];
+
+				} else {
+
+					return {
+						domain: domain,
+						level:  'zero'
+					};
+
+				}
+
+			}
+
+
+			return null;
+
+		},
+
 		isBlocked: function(domain) {
 
 			domain = isString(domain) ? domain : null;
@@ -96,25 +130,10 @@ const NX74205 = window.NX74205 = (function() {
 
 			if (domain !== null) {
 
-				let cache = this.__cache[domain] || null;
-				if (cache === null) {
-
-					let blocker     = this.settings.blockers.find((b) => this.isDomain(b.domain, domain))   || null;
-					let identity    = this.settings.identities.find((i) => this.isDomain(i.domain, domain)) || null;
-					let level       = this.settings.levels.find((l) => l.domain === domain)                 || null;
-					let distributor = this.settings.distributors.find((d) => d.domain === domain)           || null;
-
-					cache = this.__cache[domain] = {
-						level:     level,
-						identity:  identity,
-						isBlocked: blocker !== null,
-						isCDN:     distributor !== null
-					};
-
+				let blocker = this.settings.blockers.find((b) => this.isDomain(b.domain, domain)) || null;
+				if (blocker !== null) {
+					return true;
 				}
-
-
-				return cache.isBlocked === true;
 
 			}
 
@@ -151,66 +170,15 @@ const NX74205 = window.NX74205 = (function() {
 
 			if (domain !== null) {
 
-				let cache = this.__cache[domain] || null;
-				if (cache === null) {
-
-					let blocker     = this.settings.blockers.find((b) => this.isDomain(b.domain, domain))   || null;
-					let identity    = this.settings.identities.find((i) => this.isDomain(i.domain, domain)) || null;
-					let level       = this.settings.levels.find((l) => l.domain === domain)                 || null;
-					let distributor = this.settings.distributors.find((d) => d.domain === domain)           || null;
-
-					cache = this.__cache[domain] = {
-						level:     level,
-						identity:  identity,
-						isBlocked: blocker !== null,
-						isCDN:     distributor !== null
-					};
-
+				let distributor = this.settings.distributors.find((d) => d.domain === domain) || null;
+				if (distributor !== null) {
+					return true;
 				}
-
-
-				return cache.isCDN === true;
 
 			}
 
 
 			return false;
-
-		},
-
-		toLevel: function(domain) {
-
-			domain = isString(domain) ? domain : null;
-
-
-			if (domain !== null) {
-
-				let levels = this.settings.levels.filter((l) => URL.isDomain(l.domain, domain));
-				if (levels.length > 1) {
-
-					return levels.sort((a, b) => {
-						if (a.domain.length > b.domain.length) return -1;
-						if (b.domain.length > a.domain.length) return  1;
-						return 0;
-					})[0];
-
-				} else if (levels.length === 1) {
-
-					return levels[0];
-
-				} else {
-
-					return {
-						domain: domain,
-						level:  'zero'
-					};
-
-				}
-
-			}
-
-
-			return null;
 
 		}
 

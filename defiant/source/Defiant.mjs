@@ -53,7 +53,6 @@ const Defiant = function(settings, api) {
 
 	}, settings);
 
-	this.__cache = {};
 
 	this.interceptor = new Interceptor(this.settings, this, api);
 	this.storage     = new Storage(this.settings, this, api);
@@ -237,30 +236,15 @@ Defiant.prototype = Object.assign({}, Emitter.prototype, {
 
 		if (domain !== null) {
 
-			let cache = this.__cache[domain] || null;
-			if (cache === null) {
-
-				let blocker     = this.settings.blockers.find((b) => this.isDomain(b.domain, domain))   || null;
-				let identity    = this.settings.identities.find((i) => this.isDomain(i.domain, domain)) || null;
-				let level       = this.settings.levels.find((l) => l.domain === domain)                 || null;
-				let distributor = this.settings.distributors.find((d) => d.domain === domain)           || null;
-
-				cache = this.__cache[domain] = {
-					level:     level,
-					identity:  identity,
-					isBlocked: blocker !== null,
-					isCDN:     distributor !== null
-				};
-
+			let identity = this.settings.identities.find((i) => this.isDomain(i.domain, domain)) || null;
+			if (identity !== null) {
+				return identity;
 			}
-
-
-			return cache.identity;
 
 		}
 
 
-		return false;
+		return null;
 
 	},
 
@@ -271,25 +255,10 @@ Defiant.prototype = Object.assign({}, Emitter.prototype, {
 
 		if (domain !== null) {
 
-			let cache = this.__cache[domain] || null;
-			if (cache === null) {
-
-				let blocker     = this.settings.blockers.find((b) => this.isDomain(b.domain, domain))   || null;
-				let identity    = this.settings.identities.find((i) => this.isDomain(i.domain, domain)) || null;
-				let level       = this.settings.levels.find((l) => l.domain === domain)                 || null;
-				let distributor = this.settings.distributors.find((d) => d.domain === domain)           || null;
-
-				cache = this.__cache[domain] = {
-					level:     level,
-					identity:  identity,
-					isBlocked: blocker !== null,
-					isCDN:     distributor !== null
-				};
-
+			let blocker = this.settings.blockers.find((b) => this.isDomain(b.domain, domain)) || null;
+			if (blocker !== null) {
+				return true;
 			}
-
-
-			return cache.isBlocked === true;
 
 		}
 
@@ -326,25 +295,10 @@ Defiant.prototype = Object.assign({}, Emitter.prototype, {
 
 		if (domain !== null) {
 
-			let cache = this.__cache[domain] || null;
-			if (cache === null) {
-
-				let blocker     = this.settings.blockers.find((b) => this.isDomain(b.domain, domain))   || null;
-				let identity    = this.settings.identities.find((i) => this.isDomain(i.domain, domain)) || null;
-				let level       = this.settings.levels.find((l) => l.domain === domain)                 || null;
-				let distributor = this.settings.distributors.find((d) => d.domain === domain)           || null;
-
-				cache = this.__cache[domain] = {
-					level:     level,
-					identity:  identity,
-					isBlocked: blocker !== null,
-					isCDN:     distributor !== null
-				};
-
+			let distributor = this.settings.distributors.find((d) => d.domain === domain) || null;
+			if (distributor !== null) {
+				return true;
 			}
-
-
-			return cache.isCDN === true;
 
 		}
 

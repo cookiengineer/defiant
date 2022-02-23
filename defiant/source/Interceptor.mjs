@@ -1,8 +1,8 @@
 
-import { console, Emitter, isArray, isNumber, isObject, isString } from '../extern/base.mjs';
-import { isDefiant                                               } from '../source/Defiant.mjs';
-import { COOKIE                                                  } from '../source/parser/COOKIE.mjs';
-import { URL                                                     } from '../source/parser/URL.mjs';
+import { Emitter, isArray, isNumber, isObject, isString } from '../extern/base.mjs';
+import { isDefiant                                      } from '../source/Defiant.mjs';
+import { COOKIE                                         } from '../source/parser/COOKIE.mjs';
+import { URL                                            } from '../source/parser/URL.mjs';
 
 
 
@@ -233,7 +233,7 @@ const Interceptor = function(settings, defiant, api) {
 		let level  = 'zero';
 
 		if (tab !== null && tab.level !== null) {
-			domain = tab.level.domain;
+			// domain = tab.level.domain;
 			level  = tab.level.level;
 		}
 
@@ -254,15 +254,45 @@ const Interceptor = function(settings, defiant, api) {
 		}
 
 
-		if (level === 'zero' || level === 'alpha') {
+		let cookies = toCookies(details.requestHeaders, 'cookie');
+		if (cookies.length > 0) {
 
 			filter(details.requestHeaders, [
 				'cookie'
 			]);
 
-		} else if (level === 'beta' || level === 'gamma') {
+			cookies.filter(() => {
 
-			// TODO: Enable Cookies from first-party or second-party domain
+				let blocked = false;
+
+				if (level === 'zero') {
+					blocked = true;
+				} else if (level === 'alpha') {
+					blocked = false;
+				} else if (level === 'beta') {
+					blocked = false;
+				} else if (level === 'gamma') {
+					blocked = false;
+				}
+
+				return blocked === false;
+
+			}).forEach((cookie) => {
+
+				cookie.attributes = {};
+
+
+				let value = COOKIE.render(cookie);
+				if (value !== null) {
+
+					details.requestHeaders.push({
+						name:  'cookie',
+						value: value
+					});
+
+				}
+
+			});
 
 		}
 
