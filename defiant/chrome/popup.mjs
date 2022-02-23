@@ -1,11 +1,11 @@
 
+import { API     } from '../extern/extension.mjs';
 import { Element } from '../design/Element.mjs';
 import { URL     } from '../source/parser/URL.mjs';
 
 
 
-// const console = chrome.extension.getBackgroundPage().console || window.console;
-const DEFIANT = chrome.extension.getBackgroundPage().DEFIANT || null;
+const DEFIANT = API['extension'].getBackgroundPage().DEFIANT || null;
 
 const BUTTONS = {
 	incognito: Element.query('*[data-action="incognito"]'),
@@ -76,7 +76,7 @@ if (DEFIANT !== null) {
 			let tab = DEFIANT.tab || null;
 			if (tab !== null) {
 
-				chrome.windows.create({
+				API['windows'].create({
 					incognito: true,
 					url:       URL.render(tab.url)
 				});
@@ -91,20 +91,20 @@ if (DEFIANT !== null) {
 
 		BUTTONS.options.on('click', () => {
 
-			chrome.tabs.query({
-				url: chrome.runtime.getURL('chrome/options.html')
+			API['tabs'].query({
+				url: API['runtime'].getURL('chrome/options.html')
 			}, (tabs) => {
 
 				if (tabs.length > 0) {
 
-					chrome.tabs.highlight({
+					API['tabs'].highlight({
 						tabs: [ tabs[0].index ]
 					});
 
 				} else {
 
-					chrome.tabs.create({
-						url: chrome.runtime.getURL('chrome/options.html')
+					API['tabs'].create({
+						url: API['runtime'].getURL('chrome/options.html')
 					});
 
 				}
@@ -161,7 +161,7 @@ if (DEFIANT !== null) {
 
 	window.addEventListener('load', () => {
 
-		chrome.tabs.query({
+		API['tabs'].query({
 			active:        true,
 			currentWindow: true
 		}, (chrome_tabs) => {
@@ -169,7 +169,7 @@ if (DEFIANT !== null) {
 			let chrome_tab = chrome_tabs[0] || null;
 			if (chrome_tab !== null) {
 
-				let tab = DEFIANT.toTab('chrome-' + chrome_tab.id) || null;
+				let tab = DEFIANT.toTab('tab-' + chrome_tab.id) || null;
 				if (tab !== null) {
 					update.call(DEFIANT, tab);
 				}

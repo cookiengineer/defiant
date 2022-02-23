@@ -1,16 +1,8 @@
 
-const isArray    = (obj) => Object.prototype.toString.call(obj) === '[object Array]';
-const isBoolean  = (obj) => Object.prototype.toString.call(obj) === '[object Boolean]';
-const isBuffer   = (obj) => Object.prototype.toString.call(obj) === '[object Buffer]';
-const isFunction = (obj) => Object.prototype.toString.call(obj) === '[object Function]';
-const isNumber   = (obj) => Object.prototype.toString.call(obj) === '[object Number]';
-const isObject   = (obj) => Object.prototype.toString.call(obj) === '[object Object]';
-const isString   = (obj) => Object.prototype.toString.call(obj) === '[object String]';
-
-
-
 // XXX: Bundled via esbuild //
-import { URL } from '../source/parser/URL.mjs';
+import { isArray, isFunction, isObject, isString } from '../extern/base.mjs';
+import { API                                     } from '../extern/extension.mjs';
+import { URL                                     } from '../source/parser/URL.mjs';
 
 
 
@@ -60,14 +52,23 @@ const NX74205 = window.NX74205 = (function() {
 			}
 
 
-			chrome.runtime.sendMessage({
-				type:    'initialize',
-				domains: domains
+			API['runtime'].sendMessage({
+				type: 'initialize',
+				data: {
+					domains: domains
+				}
 			}, (response) => {
 
-				this.settings.blockers     = response.settings.blockers;
-				this.settings.distributors = response.settings.distributors;
-				this.settings.levels       = response.settings.levels;
+				if (
+					isObject(response) === true
+					&& isObject(response.settings) === true
+				) {
+
+					this.settings.blockers     = response.settings.blockers;
+					this.settings.distributors = response.settings.distributors;
+					this.settings.levels       = response.settings.levels;
+
+				}
 
 				ORIGIN.level = this.toLevel(ORIGIN.domain);
 
@@ -81,7 +82,7 @@ const NX74205 = window.NX74205 = (function() {
 
 		report: function(data) {
 
-			chrome.runtime.sendMessge({
+			API['runtime'].sendMessage({
 				type: 'report',
 				data: data
 			});
@@ -250,9 +251,9 @@ const DOMINION = (function() {
 						href.startsWith('/')
 						|| href.startsWith('./')
 					) {
-						return URL.resolve(ORIGIN, href);
+						return URL.resolve(ORIGIN.url, href);
 					} else {
-						return URL.resolve(ORIGIN, './' + href);
+						return URL.resolve(ORIGIN.url, './' + href);
 					}
 
 				}
@@ -623,16 +624,26 @@ const DOMINION = (function() {
 
 					if (level === 'zero') {
 
-						DEFIANT.report({
-							domain: domain,
-							level:  level,
-							link:   source.link,
-							type:   'media'
-						});
+						if (DEFIANT.isDomain(ORIGIN.domain, domain) === true) {
 
-						node.parentNode.removeChild(node);
+							node.setAttribute('src', src);
 
-						return false;
+							return true;
+
+						} else {
+
+							DEFIANT.report({
+								domain: domain,
+								level:  level,
+								link:   source.link,
+								type:   'media'
+							});
+
+							node.parentNode.removeChild(node);
+
+							return false;
+
+						}
 
 					} else if (level === 'alpha' || level === 'beta') {
 
@@ -670,7 +681,6 @@ const DOMINION = (function() {
 						return true;
 
 					}
-
 
 				}
 
@@ -985,6 +995,12 @@ const DOMINION = (function() {
 
 				}
 
+			} else if (node.tagName === 'APPLET' || node.tagName === 'EMBED' || node.tagName === 'OBJECT') {
+
+				node.parentNode.removeChild(node);
+
+				return false;
+
 			} else if (node.textContent.startsWith('<!--[') === true) {
 
 				node.parentNode.removeChild(node);
@@ -1031,6 +1047,9 @@ const DOMINION = (function() {
 						|| node.tagName === 'IMG'
 						|| node.tagName === 'AUDIO'
 						|| node.tagName === 'VIDEO'
+						|| node.tagName === 'APPLET'
+						|| node.tagName === 'EMBED'
+						|| node.tagName === 'OBJECT'
 						|| node.textContent.startsWith('<!--[')
 					) {
 						return true;
@@ -1044,7 +1063,7 @@ const DOMINION = (function() {
 
 						let observe = DOMINION.purify(node, DOMAINS);
 						if (observe === true) {
-							UNIVERSE.push(observe);
+							UNIVERSE.push(node);
 						}
 
 					}

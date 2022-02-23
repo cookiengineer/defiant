@@ -4,9 +4,10 @@
 	"private": true,
 	"version": "2021.07",
 	"scripts": {
-		"build": "node ./build.mjs"
+		"build": "node ./build.mjs",
+		"test":  "mkdir /tmp/defiant; chromium --user-data-dir=/tmp/defiant"
 	},
-	"devDependencies": {
-		"esbuild": "^0.12.15"
+	"dependencies": {
+		"esbuild": "^0.14.23"
 	}
 }

@@ -1,13 +1,14 @@
 
 import { isArray } from '../extern/base.mjs';
+import { API     } from '../extern/extension.mjs';
 import { Element } from '../design/Element.mjs';
 import { URL     } from '../source/parser/URL.mjs';
 
 
 
 const console    = window.console;
-// const console    = chrome.extension.getBackgroundPage().console || window.console;
-const DEFIANT    = chrome.extension.getBackgroundPage().DEFIANT || null;
+// const console    = API['extension'].getBackgroundPage().console || window.console;
+const DEFIANT    = API['extension'].getBackgroundPage().DEFIANT || null;
 const STATISTICS = {};
 const TABLES     = {
 	'distributors': Element.query('section#distributors table tbody'),

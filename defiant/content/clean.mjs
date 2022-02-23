@@ -149,3 +149,123 @@ setTimeout(() => {
 
 }, 200);
 
+
+
+setTimeout(() => {
+
+	let PROPERTIES = [
+		'animation',
+		'animation-delay',
+		'animation-direction',
+		'animation-duration',
+		'animation-fill-mode',
+		'animation-iteration-count',
+		'animation-name',
+		'animation-play-state',
+		'animation-timing-function',
+		'box-shadow',
+		'filter',
+		'mask',
+		'mask-border',
+		'mask-border-mode',
+		'mask-border-outset',
+		'mask-border-repeat',
+		'mask-border-slice',
+		'mask-border-source',
+		'mask-border-width',
+		'mask-clip',
+		'mask-composite',
+		'mask-image',
+		'mask-mode',
+		'mask-origin',
+		'mask-position',
+		'mask-repeat',
+		'mask-size',
+		'mask-type',
+		'opacity',
+		'overflow',
+		'overflow-anchor',
+		'overflow-block',
+		'overflow-clip-margin',
+		'overflow-inline',
+		'overflow-wrap',
+		'overflow-x',
+		'overflow-y',
+		'overscroll-behavior',
+		'overscroll-behavior-block',
+		'overscroll-behavior-inline',
+		'overscroll-behavior-x',
+		'overscroll-behavior-y',
+		'scroll-behavior',
+		'scroll-margin',
+		'scroll-margin-block',
+		'scroll-margin-block-end',
+		'scroll-margin-block-start',
+		'scroll-margin-bottom',
+		'scroll-margin-inline',
+		'scroll-margin-inline-end',
+		'scroll-margin-inline-start',
+		'scroll-margin-left',
+		'scroll-margin-right',
+		'scroll-margin-top',
+		'scroll-padding',
+		'scroll-padding-block',
+		'scroll-padding-block-end',
+		'scroll-padding-block-start',
+		'scroll-padding-bottom',
+		'scroll-padding-inline',
+		'scroll-padding-inline-end',
+		'scroll-padding-inline-start',
+		'scroll-padding-left',
+		'scroll-padding-right',
+		'scroll-padding-top',
+		'scroll-snap-align',
+		'scroll-snap-stop',
+		'scroll-snap-type',
+		'text-shadow',
+		'transition',
+		'transition-duration',
+		'transition-property',
+		'transition-timing-function',
+		'user-zoom',
+		'user-select',
+		'visibility',
+		'min-zoom',
+		'max-zoom',
+		'zoom'
+	];
+
+
+	let level = 'zero';
+
+	if (window.ORIGIN !== undefined && window.ORIGIN.level !== null) {
+		level = window.ORIGIN.level.level;
+	}
+
+	if (level === 'zero') {
+
+		Array.from(window.document.styleSheets).forEach((stylesheet) => {
+
+			Array.from(stylesheet.rules).forEach((rule) => {
+
+				if (typeof rule['style'] === 'object') {
+
+					PROPERTIES.forEach((property) => {
+
+						let check = rule.style.getPropertyValue(property);
+						if (check !== '') {
+							rule.style.setProperty(property, 'unset');
+						}
+
+					});
+
+				}
+
+			});
+
+		});
+
+	}
+
+}, 300);
+

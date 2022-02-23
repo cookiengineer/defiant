@@ -57,6 +57,9 @@
 	"options_page": "chrome/options.html",
 	"web_accessible_resources": [
 		"extern/base.mjs",
+		"extern/extension.mjs",
+		"source/parser/COOKIE.mjs",
+		"source/parser/DATETIME.mjs",
 		"source/parser/IP.mjs",
 		"source/parser/URL.mjs"
 	]

@@ -1,5 +1,8 @@
 [
 	{
+		"domain": "i.ebayimg.com"
+	},
+	{
 		"domain": "github.githubassets.com"
 	},
 	{
@@ -10,6 +13,12 @@
 	},
 	{
 		"domain": "ajax.googleapis.com"
+	},
+	{
+		"domain": "ssl.gstatic.com"
+	},
+	{
+		"domain": "i.imgur.com"
 	},
 	{
 		"domain": "cdn.jsdelivr.net"

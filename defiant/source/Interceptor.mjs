@@ -1,7 +1,8 @@
 
 import { console, Emitter, isArray, isNumber, isObject, isString } from '../extern/base.mjs';
-import { isDefiant                             } from '../source/Defiant.mjs';
-import { URL                                   } from '../source/parser/URL.mjs';
+import { isDefiant                                               } from '../source/Defiant.mjs';
+import { COOKIE                                                  } from '../source/parser/COOKIE.mjs';
+import { URL                                                     } from '../source/parser/URL.mjs';
 
 
 
@@ -30,9 +31,10 @@ const toCookies = function(headers, name) {
 
 		if (headers[h].name.toLowerCase() === name) {
 
-			let chunks = (headers[h].value || '').split(';').map((c) => c.trim());
-
-			console.log(chunks);
+			let cookie = COOKIE.parse(headers[h].value);
+			if (COOKIE.isCOOKIE(cookie) === true) {
+				cookies.push(cookie);
+			}
 
 		}
 
@@ -64,16 +66,16 @@ const toValue = function(headers, name) {
 
 
 
-const Interceptor = function(settings, defiant, chrome) {
+const Interceptor = function(settings, defiant, api) {
 
-	settings = isObject(settings)   ? settings : {};
-	defiant  = isDefiant(defiant)   ? defiant  : null;
-	chrome   = chrome !== undefined ? chrome   : null;
+	settings = isObject(settings) ? settings : {};
+	defiant  = isDefiant(defiant) ? defiant  : null;
+	api      = api !== undefined  ? api      : null;
 
 
 	this.settings = settings;
 	this.defiant  = defiant;
-	this.chrome   = chrome;
+	this.api      = api;
 
 	this.__state = {
 		connected: false,
@@ -87,7 +89,7 @@ const Interceptor = function(settings, defiant, chrome) {
 		let tab        = null;
 
 		if (isNumber(details.tabId) === true) {
-			tab = this.defiant.toTab('chrome-' + details.tabId);
+			tab = this.defiant.toTab('tab-' + details.tabId);
 		}
 
 		let blocked = false;
@@ -148,7 +150,39 @@ const Interceptor = function(settings, defiant, chrome) {
 			}
 
 		} else if (
-			url.mime.format.startsWith('font/')
+			url.mime.format.startsWith('image/') === true
+			|| url.mime.format.startsWith('audio/') === true
+			|| url.mime.format.startsWith('video/') === true
+		) {
+
+			type = 'media';
+
+			if (level === 'zero') {
+
+				if (this.defiant.isDomain(domain, url_domain) === true) {
+					blocked = false;
+				} else {
+					report  = true;
+					blocked = true;
+				}
+
+			} else if (level === 'alpha' || level === 'beta') {
+
+				if (this.defiant.isDomain(domain, url_domain) === true) {
+					blocked = false;
+				} else if (this.defiant.isCDN(url_domain) === true) {
+					blocked = false;
+				} else {
+					report  = true;
+					blocked = true;
+				}
+
+			} else if (level === 'gamma') {
+				blocked = false;
+			}
+
+		} else if (
+			url.mime.format.startsWith('font/') === true
 		) {
 
 			type    = 'asset';
@@ -192,7 +226,7 @@ const Interceptor = function(settings, defiant, chrome) {
 		let tab        = null;
 
 		if (isNumber(details.tabId) === true) {
-			tab = this.defiant.toTab('chrome-' + details.tabId);
+			tab = this.defiant.toTab('tab-' + details.tabId);
 		}
 
 		let domain = null;
@@ -300,7 +334,7 @@ const Interceptor = function(settings, defiant, chrome) {
 		let tab = null;
 
 		if (isNumber(details.tabId) === true) {
-			tab = this.defiant.toTab('chrome-' + details.tabId);
+			tab = this.defiant.toTab('tab-' + details.tabId);
 		}
 
 		let domain = null;
@@ -356,25 +390,76 @@ const Interceptor = function(settings, defiant, chrome) {
 		}
 
 
-		// XXX: Remove this, it's here for debugging purposes
-		toCookies(details.responseHeaders, 'set-cookie');
-
-
-		if (level === 'zero' || level === 'alpha') {
+		let cookies = toCookies(details.responseHeaders, 'set-cookie');
+		if (cookies.length > 0) {
 
 			filter(details.responseHeaders, [
 				'set-cookie'
 			]);
 
-		} else if (level === 'beta') {
+			cookies.filter((cookie) => {
 
-			let cookies = toCookies(details.responseHeaders, 'set-cookie');
-			if (cookies.length > 0) {
-				// TODO: Enable Cookies from first-party or second-party domain
-			}
+				let blocked = false;
 
-		} else if (level === 'gamma') {
-			// Do Nothing
+				if (level === 'zero') {
+					blocked = true;
+				} else if (level === 'alpha') {
+
+					if (isString(cookie.attributes['domain']) === true) {
+
+						if (this.defiant.isDomain(domain, cookie.attributes['domain']) === true) {
+							blocked = false;
+						} else {
+							blocked = true;
+						}
+
+					} else if (cookie.attributes['domain'] === null) {
+						blocked = false;
+					}
+
+				} else if (level === 'beta') {
+
+					if (isString(cookie.attributes['domain']) === true) {
+
+						if (this.defiant.isDomain(domain, cookie.attributes['domain']) === true) {
+							blocked = false;
+						} else if (this.defiant.isCDN(cookie.attributes['domain']) === true) {
+							blocked = false;
+						} else {
+							blocked = true;
+						}
+
+					} else if (cookie.attributes['domain'] === null) {
+						blocked = false;
+					}
+
+				} else if (level === 'gamma') {
+					blocked = false;
+				}
+
+				return blocked === false;
+
+			}).forEach((cookie) => {
+
+				// Only Alpha Level overrides Cookie lifetime
+				if (level === 'alpha') {
+					cookie.attributes['expires'] = null;
+					cookie.attributes['max-age'] = null;
+				}
+
+
+				let value = COOKIE.render(cookie);
+				if (value !== null) {
+
+					details.responseHeaders.push({
+						name:  'set-cookie',
+						value: COOKIE.render(cookie)
+					});
+
+				}
+
+			});
+
 		}
 
 
@@ -534,21 +619,21 @@ Interceptor.prototype = Object.assign({}, Emitter.prototype, {
 
 		if (this.__state.connected === false) {
 
-			if (this.chrome !== null) {
+			if (this.api !== null) {
 
-				this.chrome.webRequest.onBeforeRequest.addListener(
+				this.api.webRequest.onBeforeRequest.addListener(
 					this.__state.listeners['request'],
 					{ urls: [ 'https://*/*', 'http://*/*' ] },
 					[ 'blocking', 'requestBody', 'extraHeaders' ]
 				);
 
-				this.chrome.webRequest.onBeforeSendHeaders.addListener(
+				this.api.webRequest.onBeforeSendHeaders.addListener(
 					this.__state.listeners['filter-request-headers'],
 					{ urls: [ 'https://*/*', 'http://*/*' ] },
 					[ 'blocking', 'requestHeaders', 'extraHeaders' ]
 				);
 
-				this.chrome.webRequest.onHeadersReceived.addListener(
+				this.api.webRequest.onHeadersReceived.addListener(
 					this.__state.listeners['filter-response-headers'],
 					{ urls: [ 'https://*/*', 'http://*/*' ] },
 					[ 'blocking', 'responseHeaders', 'extraHeaders' ]
@@ -571,9 +656,13 @@ Interceptor.prototype = Object.assign({}, Emitter.prototype, {
 
 		if (this.__state.connected === true) {
 
-			this.chrome.webRequest.onBeforeRequest.removeListener(this.__state.listeners['request']);
-			this.chrome.webRequest.onBeforeSendHeaders.removeListener(this.__state.listeners['filter-request-headers']);
-			this.chrome.webRequest.onHeadersReceived.removeListener(this.__state.listeners['filter-response-headers']);
+			if (this.api !== null) {
+
+				this.api.webRequest.onBeforeRequest.removeListener(this.__state.listeners['request']);
+				this.api.webRequest.onBeforeSendHeaders.removeListener(this.__state.listeners['filter-request-headers']);
+				this.api.webRequest.onHeadersReceived.removeListener(this.__state.listeners['filter-response-headers']);
+
+			}
 
 			this.__state.connected = false;
 

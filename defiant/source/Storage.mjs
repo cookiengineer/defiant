@@ -32,21 +32,21 @@ const includes = (array, item) => {
 
 
 
-const Storage = function(settings, defiant, chrome) {
+const Storage = function(settings, defiant, api) {
 
-	settings = isObject(settings)   ? settings : {};
-	defiant  = isDefiant(defiant)   ? defiant  : null;
-	chrome   = chrome !== undefined ? chrome   : null;
+	settings = isObject(settings) ? settings : {};
+	defiant  = isDefiant(defiant) ? defiant  : null;
+	api      = api !== undefined  ? api      : null;
 
 
 	this.settings = settings;
 	this.defiant  = defiant;
-	this.chrome   = chrome;
+	this.api      = api;
 
 
-	if (this.chrome !== null) {
+	if (this.api !== null) {
 
-		fetch(this.chrome.runtime.getURL('extern/blockers.json')).then((response) => {
+		fetch(this.api.runtime.getURL('extern/blockers.json')).then((response) => {
 			return response.json();
 		}).then((blockers) => {
 
@@ -56,7 +56,7 @@ const Storage = function(settings, defiant, chrome) {
 
 		});
 
-		fetch(this.chrome.runtime.getURL('extern/filters.json')).then((response) => {
+		fetch(this.api.runtime.getURL('extern/filters.json')).then((response) => {
 			return response.json();
 		}).then((filters) => {
 
@@ -66,7 +66,7 @@ const Storage = function(settings, defiant, chrome) {
 
 		});
 
-		fetch(this.chrome.runtime.getURL('extern/distributors.json')).then((response) => {
+		fetch(this.api.runtime.getURL('extern/distributors.json')).then((response) => {
 			return response.json();
 		}).then((distributors) => {
 
@@ -84,7 +84,7 @@ const Storage = function(settings, defiant, chrome) {
 
 		});
 
-		fetch(this.chrome.runtime.getURL('extern/identities.json')).then((response) => {
+		fetch(this.api.runtime.getURL('extern/identities.json')).then((response) => {
 			return response.json();
 		}).then((identities) => {
 
@@ -147,9 +147,9 @@ Storage.prototype = {
 		callback = isFunction(callback) ? callback : () => {};
 
 
-		if (this.chrome !== null) {
+		if (this.api !== null) {
 
-			this.chrome.storage.local.get('defiant', (blob) => {
+			this.api.storage.local.get('defiant', (blob) => {
 
 				let data = blob['defiant'] || null;
 
@@ -210,9 +210,9 @@ Storage.prototype = {
 		callback = isFunction(callback) ? callback : () => {};
 
 
-		if (this.chrome !== null) {
+		if (this.api !== null) {
 
-			this.chrome.storage.local.set({
+			this.api.storage.local.set({
 				'defiant': this.settings
 			}, () => {
 

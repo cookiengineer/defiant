@@ -30,7 +30,7 @@ export const isLevel = function(payload) {
 
 
 
-const Defiant = function(settings, chrome) {
+const Defiant = function(settings, api) {
 
 	settings = isObject(settings) ? settings : {};
 
@@ -55,8 +55,8 @@ const Defiant = function(settings, chrome) {
 
 	this.__cache = {};
 
-	this.interceptor = new Interceptor(this.settings, this, chrome);
-	this.storage     = new Storage(this.settings, this, chrome);
+	this.interceptor = new Interceptor(this.settings, this, api);
+	this.storage     = new Storage(this.settings, this, api);
 	this.tab         = null;
 	this.tabs        = [];
 
@@ -130,37 +130,32 @@ Defiant.prototype = Object.assign({}, Emitter.prototype, {
 
 	},
 
-	toLevel: function(url) {
+	toLevel: function(domain) {
 
-		url = URL.isURL(url) ? url : null;
+		domain = isString(domain) ? domain : null;
 
 
-		if (url !== null) {
+		if (domain !== null) {
 
-			let search = URL.toDomain(url);
-			if (search !== null) {
+			let levels = this.settings.levels.filter((l) => URL.isDomain(l.domain, domain));
+			if (levels.length > 1) {
 
-				let levels = this.settings.levels.filter((l) => URL.isDomain(l.domain, search));
-				if (levels.length > 1) {
+				return levels.sort((a, b) => {
+					if (a.domain.length > b.domain.length) return -1;
+					if (b.domain.length > a.domain.length) return  1;
+					return 0;
+				})[0];
 
-					return levels.sort((a, b) => {
-						if (a.domain.length > b.domain.length) return -1;
-						if (b.domain.length > a.domain.length) return  1;
-						return 0;
-					})[0];
+			} else if (levels.length === 1) {
 
-				} else if (levels.length === 1) {
+				return levels[0];
 
-					return levels[0];
+			} else {
 
-				} else {
-
-					return {
-						domain: search,
-						level:  'zero'
-					};
-
-				}
+				return {
+					domain: domain,
+					level:  'zero'
+				};
 
 			}
 
