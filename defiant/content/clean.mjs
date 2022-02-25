@@ -246,24 +246,49 @@ setTimeout(() => {
 
 		Array.from(window.document.styleSheets).forEach((stylesheet) => {
 
-			Array.from(stylesheet.rules).forEach((rule) => {
+			let rules = null;
 
-				if (typeof rule['style'] === 'object') {
+			try {
+				rules = stylesheet.rules;
+			} catch (err) {
+				rules = null;
+			}
 
-					PROPERTIES.forEach((property) => {
+			if (rules !== null) {
 
-						let check = rule.style.getPropertyValue(property);
-						if (check !== '') {
-							rule.style.setProperty(property, 'unset');
-						}
+				Array.from(rules).forEach((rule) => {
 
-					});
+					if (typeof rule.style === 'object') {
 
-				}
+						PROPERTIES.forEach((property) => {
 
-			});
+							let check = rule.style.getPropertyValue(property);
+							if (check !== '') {
+								rule.style.setProperty(property, 'unset');
+							}
+
+						});
+
+					}
+
+				});
+
+			}
 
 		});
+
+		let node = window.document.createElement('style');
+		let text = [];
+
+		text.push('body > * * {');
+		PROPERTIES.forEach((property) => {
+			text.push('\t' + property + ': unset !important;');
+		});
+		text.push('}');
+
+		node.innerHTML = text.join('\n');
+
+		window.document.head.appendChild(node);
 
 	}
 

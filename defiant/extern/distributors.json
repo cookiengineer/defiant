@@ -1,5 +1,8 @@
 [
 	{
+		"domain": "cdnjs.cloudflare.com"
+	},
+	{
 		"domain": "i.ebayimg.com"
 	},
 	{
@@ -24,9 +27,30 @@
 		"domain": "cdn.jsdelivr.net"
 	},
 	{
+		"domain": "preview.redd.it"
+	},
+	{
+		"domain": "a.thumbs.redditmedia.com"
+	},
+	{
+		"domain": "b.thumbs.redditmedia.com"
+	},
+	{
 		"domain": "www.redditstatic.com"
 	},
 	{
 		"domain": "cdn.sstatic.net"
+	},
+	{
+		"domain": "assets.squarespace.com"
+	},
+	{
+		"domain": "static1.squarespace.com"
+	},
+	{
+		"domain": "static1.squarespace.com"
+	},
+	{
+		"domain": "images.squarespace-cdn.com"
 	}
 ]

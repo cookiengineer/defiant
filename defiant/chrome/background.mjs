@@ -63,7 +63,6 @@ API['runtime'].onMessage.addListener((request, sender, callback) => {
 			request.data.domains.forEach((domain) => {
 
 				let level = DEFIANT.toLevel(domain);
-				console.log(level);
 				if (level !== null) {
 					settings.levels.push(level);
 				}
@@ -78,33 +77,26 @@ API['runtime'].onMessage.addListener((request, sender, callback) => {
 
 	} else if (request.type === 'report') {
 
-		// TODO: Integrate Content Blocker Reporting
-		// console.log('REPORT', request);
+		if (
+			isObject(request.data) === true
+			&& isString(request.data.domain) === true
+			&& isString(request.data.link) === true
+			&& isString(request.data.level) === true
+			&& isString(request.data.type) ===  true
+		) {
 
-		// let domain = request.data.domain || null;
-		// let link   = request.data.link   || null;
-		// let level  = request.data.level  || 'zero';
-		// let type   = request.data.type   || null;
+			DEFIANT.settings.statistics.push({
+				domain: request.data.domain,
+				level:  request.data.level,
+				link:   request.data.link,
+				type:   request.data.type
+			});
 
-		// if (
-		// 	isString(domain) === true
-		// 	&& isString(link) === true
-		// 	&& isString(level) === true
-		// 	&& isString(type) ===  true
-		// ) {
+			DEFIANT.storage.save();
 
-		// 	console.log('report', request.data);
-
-		// 	DEFIANT.settings.statistics.push({
-		// 		domain: domain,
-		// 		level:  level,
-		// 		link:   link,
-		// 		type:   type
-		// 	});
-
-		// 	DEFIANT.storage.save();
-
-		// }
+		} else {
+			console.warn('INVALID REPORT', request);
+		}
 
 	}
 

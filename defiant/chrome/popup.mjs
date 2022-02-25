@@ -5,52 +5,47 @@ import { URL     } from '../source/parser/URL.mjs';
 
 
 
+const console = API['extension'].getBackgroundPage().console || null;
 const DEFIANT = API['extension'].getBackgroundPage().DEFIANT || null;
 
+
+
 const BUTTONS = {
-	incognito: Element.query('*[data-action="incognito"]'),
-	options:   Element.query('*[data-action="options"]')
+	'confirm':   Element.query('*[data-action="confirm"]'),
+	'incognito': Element.query('*[data-action="incognito"]'),
+	'options':   Element.query('*[data-action="options"]')
 };
 
 const ELEMENTS = {
-	domain: Element.query('*[data-key="domain"]'),
-	info:   Element.query('*[data-key="info"]'),
-	level:  Element.query('*[data-key="level"]')
+	'domain':  Element.query('*[data-key="domain"]'),
+	'info':    Element.query('*[data-key="info"]'),
+	'level':   Element.query('*[data-key="level"]')
 };
 
 const update = function(tab) {
 
-	if (ELEMENTS.domain !== null) {
-		ELEMENTS.domain.value(URL.toDomain(tab.url));
+	if (ELEMENTS['domain'] !== null) {
+		ELEMENTS['domain'].value(URL.toDomain(tab.url));
 	}
 
-	if (ELEMENTS.level !== null) {
+	if (tab.level !== null) {
 
-		if (tab.level !== null) {
-			ELEMENTS.level.value([ 'zero', 'alpha', 'beta', 'gamma' ].indexOf(tab.level.level));
-		} else {
-			ELEMENTS.level.value(0);
+		ELEMENTS['level'].value([ 'zero', 'alpha', 'beta', 'gamma' ].indexOf(tab.level.level));
+
+		if (tab.level.level === 'zero') {
+			ELEMENTS['info'].value('Zero: Static Website');
+		} else if (tab.level.level === 'alpha') {
+			ELEMENTS['info'].value('Alpha: Interactive Website');
+		} else if (tab.level.level === 'beta') {
+			ELEMENTS['info'].value('Beta: Social Web App');
+		} else if (tab.level.level === 'gamma') {
+			ELEMENTS['info'].value('Gamma: Social Media App');
 		}
 
-	}
+	} else {
 
-	if (ELEMENTS.info !== null) {
-
-		if (tab.level !== null) {
-
-			if (tab.level.level === 'zero') {
-				ELEMENTS.info.value('Zero: Maximum Security');
-			} else if (tab.level.level === 'alpha') {
-				ELEMENTS.info.value('Alpha: Interactive Website');
-			} else if (tab.level.level === 'beta') {
-				ELEMENTS.info.value('Beta: Media + Frames + Cookies');
-			} else if (tab.level.level === 'gamma') {
-				ELEMENTS.info.value('Gamma: Web App');
-			}
-
-		} else {
-			ELEMENTS.info.value('Zero: Maximum Security');
-		}
+		ELEMENTS['level'].value(0);
+		ELEMENTS['info'].value('Zero: Static Website');
 
 	}
 
@@ -58,10 +53,12 @@ const update = function(tab) {
 		tab.url.protocol === 'https'
 		|| tab.url.protocol === 'http'
 	) {
-		BUTTONS.incognito.attr('disabled', false);
+		BUTTONS['incognito'].state('enabled');
 	} else {
-		BUTTONS.incognito.attr('disabled', true);
+		BUTTONS['incognito'].state('disabled');
 	}
+
+	BUTTONS['confirm'].state('disabled');
 
 };
 
@@ -69,90 +66,132 @@ const update = function(tab) {
 
 if (DEFIANT !== null) {
 
-	if (BUTTONS.incognito !== null) {
+	BUTTONS['incognito'].on('click', () => {
 
-		BUTTONS.incognito.on('click', () => {
+		let tab = DEFIANT.tab || null;
+		if (tab !== null) {
 
-			let tab = DEFIANT.tab || null;
-			if (tab !== null) {
+			API['windows'].create({
+				incognito: true,
+				url:       URL.render(tab.url)
+			});
 
-				API['windows'].create({
-					incognito: true,
-					url:       URL.render(tab.url)
+		}
+
+	});
+
+	BUTTONS['options'].on('click', () => {
+
+		API['tabs'].query({
+			url: API['runtime'].getURL('chrome/options.html')
+		}, (tabs) => {
+
+			if (tabs.length > 0) {
+
+				API['tabs'].highlight({
+					tabs: [ tabs[0].index ]
+				});
+
+			} else {
+
+				API['tabs'].create({
+					url: API['runtime'].getURL('chrome/options.html')
 				});
 
 			}
 
 		});
 
-	}
+	});
 
-	if (BUTTONS.options !== null) {
+	ELEMENTS['level'].on('input', () => {
 
-		BUTTONS.options.on('click', () => {
+		let value = ELEMENTS['level'].value();
+		let level = [ 'zero', 'alpha', 'beta', 'gamma' ][value] || null;
+
+		if (level !== null) {
+
+			if (level === 'zero') {
+				ELEMENTS['level'].state('zero');
+				ELEMENTS['info'].value('Zero: Static Website');
+			} else if (level === 'alpha') {
+				ELEMENTS['level'].state('alpha');
+				ELEMENTS['info'].value('Alpha: Interactive Website');
+			} else if (level === 'beta') {
+				ELEMENTS['level'].state('beta');
+				ELEMENTS['info'].value('Beta: Social Web App');
+			} else if (level === 'gamma') {
+				ELEMENTS['level'].state('gamma');
+				ELEMENTS['info'].value('Gamma: Social Media App');
+			}
+		}
+
+	});
+
+	ELEMENTS['level'].on('input', () => {
+
+		let value = ELEMENTS['level'].value();
+		let level = [ 'zero', 'alpha', 'beta', 'gamma' ][value] || null;
+		let tab   = DEFIANT.tab || null;
+
+		if (tab !== null && level !== null) {
+
+			if (
+				tab.url.protocol === 'https'
+				|| tab.url.protocol === 'http'
+			) {
+
+				if (tab.level !== null && tab.level.level !== level) {
+					BUTTONS['confirm'].state('enabled');
+				} else if (tab.level === null) {
+					BUTTONS['confirm'].state('enabled');
+				} else {
+					BUTTONS['confirm'].state('disabled');
+				}
+
+			} else {
+				BUTTONS['confirm'].state('disabled');
+			}
+
+		} else {
+			BUTTONS['confirm'].state('disabled');
+		}
+
+	});
+
+	BUTTONS['confirm'].on('click', () => {
+
+		let tab   = DEFIANT.tab || null;
+		let value = ELEMENTS['level'].value();
+		let level = [ 'zero', 'alpha', 'beta', 'gamma' ][value] || null;
+
+		if (tab !== null && level !== null) {
+
+			DEFIANT.setLevel({
+				domain: URL.toDomain(tab.url),
+				level:  level
+			});
+
 
 			API['tabs'].query({
-				url: API['runtime'].getURL('chrome/options.html')
-			}, (tabs) => {
+				active:        true,
+				currentWindow: true
+			}, (chrome_tabs) => {
 
-				if (tabs.length > 0) {
+				let chrome_tab = chrome_tabs[0] || null;
+				if (chrome_tab !== null) {
 
-					API['tabs'].highlight({
-						tabs: [ tabs[0].index ]
-					});
-
-				} else {
-
-					API['tabs'].create({
-						url: API['runtime'].getURL('chrome/options.html')
+					API['tabs'].reload(chrome_tab.id, () => {
+						BUTTONS['confirm'].state('disabled');
 					});
 
 				}
 
 			});
 
-		});
+		}
 
-	}
-
-	if (ELEMENTS.level !== null) {
-
-		ELEMENTS.level.on('change', () => {
-
-			let tab = DEFIANT.tab || null;
-			if (tab !== null) {
-
-				let value = ELEMENTS.level.value();
-				let level = [ 'zero', 'alpha', 'beta', 'gamma' ][value] || null;
-				if (level !== null) {
-
-					if (ELEMENTS.info !== null) {
-
-						if (level === 'zero') {
-							ELEMENTS.info.value('Zero: Maximum Security');
-						} else if (level === 'alpha') {
-							ELEMENTS.info.value('Alpha: Interactive Website');
-						} else if (level === 'beta') {
-							ELEMENTS.info.value('Beta: Media + Frames + Cookies');
-						} else if (level === 'gamma') {
-							ELEMENTS.info.value('Gamma: Web App');
-						}
-
-					}
-
-					DEFIANT.setLevel({
-						domain: URL.toDomain(tab.url),
-						level:  level
-					});
-
-				}
-
-			}
-
-		});
-
-	}
-
+	});
 
 	DEFIANT.on('change', (tab) => {
 		update.call(DEFIANT, tab);

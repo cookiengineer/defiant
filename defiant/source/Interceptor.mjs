@@ -17,6 +17,7 @@ const filter = function(headers, names) {
 		let name = headers[h].name.toLowerCase();
 		if (names.includes(name) === true) {
 			headers.splice(h, 1);
+			h--;
 		}
 
 	}
@@ -314,7 +315,6 @@ const Interceptor = function(settings, defiant, api) {
 			'pragma',
 			'proxy-authorization',
 			'upgrade',
-			'user-agent',
 			'via',
 			'warning'
 		]);
@@ -322,6 +322,10 @@ const Interceptor = function(settings, defiant, api) {
 
 		let identity = this.defiant.toIdentity(url_domain);
 		if (identity !== null) {
+
+			filter(details.requestHeaders, [
+				'user-agent'
+			]);
 
 			if (isString(identity['user-agent']) === true) {
 
@@ -573,6 +577,13 @@ const Interceptor = function(settings, defiant, api) {
 
 		}
 
+		filter(details.responseHeaders, [
+			'access-control-allow-methods',
+			'access-control-allow-origin',
+			'content-security-policy',
+			'x-xss-protection'
+		]);
+
 
 		// TODO: content-security-policy based on trust level
 		// if (level === 'zero') {
@@ -581,21 +592,21 @@ const Interceptor = function(settings, defiant, api) {
 		// } else if (level === 'gamma') {
 		// }
 
-		details.responseHeaders.push({
-			name:  'content-security-policy',
-			value: [
-				'child-src \'none\'',
-				'frame-src \'none\'',
-				'object-src \'none\'',
-				'script-src \'none\'',
-				'script-src-attr \'none\''
-			].join(';')
-		});
+		// details.responseHeaders.push({
+		// 	name:  'content-security-policy',
+		// 	value: [
+		// 		'child-src \'none\'',
+		// 		'frame-src \'none\'',
+		// 		'object-src \'none\'',
+		// 		'script-src \'none\'',
+		// 		'script-src-attr \'none\''
+		// 	].join(';')
+		// });
 
-		details.responseHeaders.push({
-			name:  'x-xss-protection',
-			value: '1; mode=block'
-		});
+		// details.responseHeaders.push({
+		// 	name:  'x-xss-protection',
+		// 	value: '1; mode=block'
+		// });
 
 
 		return {

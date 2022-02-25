@@ -214,7 +214,7 @@ const DOMINION = (function() {
 					} else if (
 						href.startsWith('//')
 					) {
-						return URL.resolve(ORIGIN.protocol + ':' + href);
+						return URL.resolve(ORIGIN.url.protocol + ':' + href);
 					} else if (
 						href.startsWith('/')
 						|| href.startsWith('./')

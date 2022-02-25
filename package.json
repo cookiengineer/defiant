@@ -5,7 +5,7 @@
 	"version": "2021.07",
 	"scripts": {
 		"build": "node ./build.mjs",
-		"test":  "mkdir /tmp/defiant; chromium --user-data-dir=/tmp/defiant"
+		"test":  "mkdir /tmp/defiant; chromium --user-data-dir=/tmp/defiant --load-extension=$PWD/defiant"
 	},
 	"dependencies": {
 		"esbuild": "^0.14.23"

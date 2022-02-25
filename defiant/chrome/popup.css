@@ -6,10 +6,11 @@ body {
 }
 
 h3[data-key="domain"] {
+	width: 100%;
 	margin: 0px;
-	padding: 0px;
-	font-family: 'crystalline';
-	font-size: 24px;
+	padding: 16px 0px 0px 0px;
+	font-family: 'vera-mono';
+	font-size: 20px;
 	font-weight: 500;
 	line-height: 32px;
 	text-transform: lowercase;
@@ -27,8 +28,13 @@ span[data-key="info"] {
 	width: 100%;
 	margin: 0px;
 	padding: 0px;
-	font-size: 12px;
+	font-size: 18px;
+	text-align: center;
 	white-space: pre;
+}
+
+button[data-action="confirm"]:before {
+	content: '\e876';
 }
 
 button[data-action="incognito"]:before {
@@ -39,10 +45,29 @@ button[data-action="options"]:before {
 	content: '\e8b8';
 }
 
+input[data-key="level"],
+input[data-key="level"]::-webkit-slider-thumb,
+input[data-key="level"]::-webkit-slider-runnable-track {
+	transition: all 250ms ease-out;
+}
+
+input[data-key="level"].zero                                 { color:      #ffffff; }
+input[data-key="level"].zero::-webkit-slider-thumb           { background: #ffffff; }
+input[data-key="level"].zero::-webkit-slider-runnable-track  { background: #ffffff; }
+input[data-key="level"].alpha                                { color:      #2222ff; }
+input[data-key="level"].alpha::-webkit-slider-thumb          { background: #2222ff; }
+input[data-key="level"].alpha::-webkit-slider-runnable-track { background: #2222ff; }
+input[data-key="level"].beta                                 { color:      #ffff22; }
+input[data-key="level"].beta::-webkit-slider-thumb           { background: #ffff22; }
+input[data-key="level"].beta::-webkit-slider-runnable-track  { background: #ffff22; }
+input[data-key="level"].gamma                                { color:      #ff2222; }
+input[data-key="level"].gamma::-webkit-slider-thumb          { background: #ff2222; }
+input[data-key="level"].gamma::-webkit-slider-runnable-track { background: #ff2222; }
+
 header,
 footer {
 	display: block;
-	width: 248px;
+	width: 320px;
 	height: auto;
 	margin: 0px;
 	padding: 0px;

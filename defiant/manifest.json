@@ -61,6 +61,7 @@
 		"source/parser/COOKIE.mjs",
 		"source/parser/DATETIME.mjs",
 		"source/parser/IP.mjs",
+		"source/parser/UA.mjs",
 		"source/parser/URL.mjs"
 	]
 }

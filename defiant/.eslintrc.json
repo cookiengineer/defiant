@@ -28,6 +28,15 @@
 				}
 			]
 		}
+	}, {
+		"files": [ "chrome/background.mjs", "chrome/popup.mjs" ],
+		"rules": {
+			"no-unused-vars": [
+				"error", {
+					"varsIgnorePattern": "^(DEFIANT|console)$"
+				}
+			]
+		}
 	}],
 	"rules": {
 		"no-restricted-globals": [
