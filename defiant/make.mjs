@@ -1,299 +1,132 @@
 
-import fs      from 'fs';
-import http    from 'http';
-import https   from 'https';
-import url     from 'url';
+import esbuild from 'esbuild';
 import path    from 'path';
 import process from 'process';
-
-import { console             } from '../../stealth/base/source/node/console.mjs';
-import { isString            } from '../../stealth/base/source/String.mjs';
-import { build as build_base } from '../../stealth/base/make.mjs';
+import url     from 'url';
 
 
 
-const CACHE   = {};
-const DOMAINS = {};
-const FILE    = url.fileURLToPath(import.meta.url);
-const STEALTH = path.dirname(path.resolve(FILE, '../../')) + '/stealth';
-const ROOT    = path.dirname(path.resolve(FILE, '../'));
-const TARGET  = ROOT + '/stealthify';
+import { _, console, copy, exec, exec_then_kill, mktemp, read, remove, write } from './extern/make.mjs';
 
+const isBoolean = (obj) => Object.prototype.toString.call(obj) === '[object Boolean]';
+const isObject  = (obj) => Object.prototype.toString.call(obj) === '[object Object]';
+const isString  = (obj) => Object.prototype.toString.call(obj) === '[object String]';
 
+const CACHE  = {};
+const FILE   = url.fileURLToPath(import.meta.url);
+const ROOT   = path.dirname(path.resolve(FILE, '../'));
+const TARGET = ROOT;
 
-const copy = (origin, target) => {
+const SIGNING_KEY = (() => {
 
-	let stat   = null;
-	let result = false;
+	let signing_key = null;
 
-	try {
-		stat = fs.statSync(path.resolve(origin));
-	} catch (err) {
-		stat = null;
+	if (
+		isObject(process.env) === true
+		&& isString(process.env.SIGNING_KEY) === true
+		&& process.env.SIGNING_KEY.endsWith('/.pem') === true
+	) {
+		signing_key = process.env.SIGNING_KEY;
 	}
 
-	if (stat !== null) {
+	return signing_key;
 
-		if (stat.isDirectory() === true) {
+})();
 
-			let files = [];
+const STEALTH = (() => {
 
-			try {
-				files = fs.readdirSync(path.resolve(origin));
-			} catch (err) {
-				files = [];
-			}
+	let stealth = null;
 
-			if (files.length > 0) {
+	if (
+		isObject(process.env) === true
+		&& isString(process.env.STEALTH) === true
+	) {
 
-				let results = files.map((file) => {
-					return copy(origin + '/' + file, target + '/' + file);
-				});
+		stealth = process.env.STEALTH;
 
-				if (results.includes(false) === false) {
-					result = true;
-				} else {
-					result = false;
-				}
-
-			} else {
-				result = true;
-			}
-
-		} else if (stat.isFile() === true) {
-
-			stat = null;
-
-			try {
-				stat = fs.statSync(path.dirname(target));
-			} catch (err) {
-				stat = null;
-			}
-
-			if (stat === null || stat.isDirectory() === false) {
-
-				try {
-					fs.mkdirSync(path.dirname(target), {
-						recursive: true
-					});
-				} catch (err) {
-					// Ignore
-				}
-
-			}
-
-			try {
-				fs.copyFileSync(path.resolve(origin), path.resolve(target));
-				result = true;
-			} catch (err) {
-				result = false;
-			}
-
-		}
-
-	}
-
-	if (origin.startsWith(ROOT) === true) {
-		origin = origin.substr(ROOT.length + 1);
-	}
-
-	if (target.startsWith(ROOT) === true) {
-		target = target.substr(ROOT.length + 1);
-	}
-
-	if (result === true) {
-		console.info('stealthify: copy("' + origin + '", "' + target + '")');
 	} else {
-		console.error('stealthify: copy("' + origin + '", "' + target + '")');
-	}
 
-	return result;
-
-};
-
-const read = (url) => {
-
-	let buffer = null;
-
-	try {
-		buffer = fs.readFileSync(path.resolve(url));
-	} catch(err) {
-		buffer = null;
-	}
-
-	return buffer;
-
-};
-
-const remove = (url) => {
-
-	let stat   = null;
-	let result = false;
-
-	try {
-		stat = fs.statSync(path.resolve(url));
-	} catch (err) {
-		stat = null;
-	}
-
-	if (stat !== null) {
-
-		if (stat.isDirectory() === true) {
-
-			try {
-				fs.rmdirSync(path.resolve(url), {
-					recursive: true
-				});
-				result = true;
-			} catch (err) {
-				result = false;
-			}
-
-		} else if (stat.isFile() === true) {
-
-			try {
-				fs.unlinkSync(path.resolve(url));
-				result = true;
-			} catch (err) {
-				result = false;
-			}
-
+		if (ROOT.endsWith('/Software/cookiengineer/defiant') === true) {
+			stealth = ROOT.substr(0, ROOT.length - 31) + '/Software/tholian-network/stealth';
 		}
 
 	}
 
-	return result;
+	if (stealth !== null) {
 
-};
+		let pkg_json = null;
 
-const IGNORED = [
-	path.resolve(ROOT + '/browser/bin'),
-	path.resolve(ROOT + '/browser.mjs'),
-	path.resolve(ROOT + '/browser/README.md'),
-	path.resolve(ROOT + '/browser/make.mjs')
-];
+		try {
+			pkg_json = JSON.parse(read(stealth + '/package.json').buffer.toString('utf8'));
+		} catch (err) {
+			pkg_json = null;
+		}
 
-const walk = (url, result) => {
-
-	if (IGNORED.includes(path.resolve(url))) {
-		return result;
-	}
-
-
-	if (result === undefined) {
-		result = [];
-	}
-
-	let stat = null;
-
-	try {
-		stat = fs.lstatSync(path.resolve(url));
-	} catch (err) {
-		stat = null;
-	}
-
-	if (stat !== null) {
-
-		if (stat.isDirectory() === true) {
-
-			let nodes = [];
-
-			try {
-				nodes = fs.readdirSync(path.resolve(url));
-			} catch (err) {
-				nodes = [];
-			}
-
-			if (nodes.length > 0) {
-
-				nodes.forEach((node) => {
-					walk(url + '/' + node, result);
-				});
-
-			}
-
-		} else if (stat.isFile() === true) {
-
-			let name = url.split('/').pop();
-			if (name.startsWith('.') === false) {
-				result.push(url);
-			}
-
+		if (
+			isObject(pkg_json) === true
+			&& isString(pkg_json['name']) === true
+			&& pkg_json['name'] === 'stealth'
+		) {
+			return stealth;
 		}
 
 	}
 
-	return result;
 
-};
+	return null;
 
-const write = (url, buffer) => {
-
-	let result = false;
-
-	try {
-		fs.writeFileSync(path.resolve(url), buffer);
-		result = true;
-	} catch (err) {
-		result = false;
-	}
-
-	if (result === true) {
-		console.info('stealthify: write("' + path.resolve(url).substr(ROOT.length + 1) + '")');
-	} else {
-		console.error('stealthify: write("' + path.resolve(url).substr(ROOT.length + 1) + '")');
-	}
-
-	return result;
-
-};
+})();
 
 
 
-export const clean = (target) => {
+export const clean = async (target) => {
 
 	target = isString(target) ? target : TARGET;
 
 
-	if (CACHE[target] === true) {
+	if (CACHE[target] !== false) {
 
 		CACHE[target] = false;
 
+
+		console.info('defiant: clean("' + _(target) + '")');
 
 		let results = [];
 
 		if (target === TARGET) {
 
-			console.log('stealthify: clean()');
-
 			[
-				remove(target + '/extern/base.mjs'),
-				remove(target + '/design/common'),
-				remove(target + '/design/Element.mjs'),
-				remove(target + '/design/Widget.mjs'),
-				remove(target + '/source/parser/DATETIME.mjs'),
-				remove(target + '/source/parser/IP.mjs'),
-				remove(target + '/source/parser/UA.mjs'),
-				remove(target + '/source/parser/URL.mjs')
+				remove(target + '/defiant/content/block.bundle.js'),
+				remove(target + '/defiant/content/clean.bundle.js')
 			].forEach((result) => results.push(result));
 
 		} else {
 
-			console.log('stealthify: clean("' + target + '")');
-
 			[
-				remove(target)
+				remove(target + '/defiant/content/block.bundle.js'),
+				remove(target + '/defiant/content/clean.bundle.js'),
+				remove(target + '/defiant/chrome'),
+				remove(target + '/defiant/content'),
+				remove(target + '/defiant/design'),
+				remove(target + '/defiant/extern'),
+				remove(target + '/defiant/manifest.json'),
+				remove(target + '/defiant/source')
 			].forEach((result) => results.push(result));
 
 		}
 
 
 		if (results.includes(false) === false) {
+
 			return true;
+
+		} else {
+
+			console.error('defiant: clean("' + _(target) + '"): fail');
+
+			return false;
+
 		}
-
-
-		return false;
 
 	}
 
@@ -302,80 +135,91 @@ export const clean = (target) => {
 
 };
 
-export const build = (target) => {
+const bundle = (origin, target) => {
+
+	let result = esbuild.buildSync({
+		entryPoints: [ origin ],
+		bundle:      true,
+		outfile:     target
+	});
+
+	if (result.errors.length === 0) {
+		return true;
+	}
+
+
+	return false;
+
+};
+
+const build = async (target) => {
 
 	target = isString(target) ? target : TARGET;
 
 
 	if (CACHE[target] === true) {
 
+		console.warn('defiant: build("' + _(target) + '"): skip');
+
 		return true;
 
 	} else if (CACHE[target] !== true) {
 
-		let results = [
-			build_base()
-		];
+		console.info('defiant: build("' + _(target) + '")');
+
+		let results = [];
 
 		if (target === TARGET) {
 
-			console.log('stealthify: build()');
+			if (STEALTH !== null) {
+
+				[
+					copy(STEALTH + '/stealth/source/parser/DATETIME.mjs', target + '/defiant/source/parser/DATETIME.mjs'),
+					copy(STEALTH + '/stealth/source/parser/IP.mjs',       target + '/defiant/source/parser/IP.mjs'),
+					copy(STEALTH + '/stealth/source/parser/UA.mjs',       target + '/defiant/source/parser/UA.mjs'),
+					copy(STEALTH + '/stealth/source/parser/URL.mjs',      target + '/defiant/source/parser/URL.mjs'),
+				].forEach((result) => results.push(result));
+
+			} else {
+
+				console.error('defiant: build("' + _(target) + '")');
+				console.error('Cannot find Stealth codebase. Use export STEALTH="/path/to/stealth".');
+
+			}
 
 			[
-				copy(STEALTH + '/base/build/browser.mjs',             target + '/extern/base.mjs'),
-				copy(STEALTH + '/browser/design/common',              target + '/design/common'),
-				copy(STEALTH + '/browser/design/Element.mjs',         target + '/design/Element.mjs'),
-				copy(STEALTH + '/browser/design/Widget.mjs',          target + '/design/Widget.mjs'),
-				copy(STEALTH + '/stealth/source/parser/DATETIME.mjs', target + '/source/parser/DATETIME.mjs'),
-				copy(STEALTH + '/stealth/source/parser/IP.mjs',       target + '/source/parser/IP.mjs'),
-				copy(STEALTH + '/stealth/source/parser/UA.mjs',       target + '/source/parser/UA.mjs'),
-				copy(STEALTH + '/stealth/source/parser/URL.mjs',      target + '/source/parser/URL.mjs')
+				bundle(ROOT + '/defiant/content/block.mjs', target + '/defiant/content/block.bundle.js'),
+				bundle(ROOT + '/defiant/content/clean.mjs', target + '/defiant/content/clean.bundle.js'),
 			].forEach((result) => results.push(result));
 
 		} else {
 
-			console.log('stealthify: build("' + target + '")');
+			if (STEALTH !== null) {
+
+				[
+					copy(STEALTH + '/stealth/source/parser/DATETIME.mjs', target + '/defiant/source/parser/DATETIME.mjs'),
+					copy(STEALTH + '/stealth/source/parser/IP.mjs',       target + '/defiant/source/parser/IP.mjs'),
+					copy(STEALTH + '/stealth/source/parser/UA.mjs',       target + '/defiant/source/parser/UA.mjs'),
+					copy(STEALTH + '/stealth/source/parser/URL.mjs',      target + '/defiant/source/parser/URL.mjs'),
+				].forEach((result) => results.push(result));
+
+			} else {
+
+				console.error('defiant: build("' + _(target) + '")');
+				console.error('Cannot find Stealth codebase. Use export STEALTH="/path/to/stealth".');
+
+			}
 
 			[
-				copy(STEALTH + '/base/build/browser.mjs',        target + '/extern/base.mjs'),
-				copy(ROOT    + '/stealthify/chrome',             target + '/chrome'),
-				copy(ROOT    + '/stealthify/design',             target + '/design'),
-				copy(STEALTH + '/browser/design/common',         target + '/design/common'),
-				copy(STEALTH + '/browser/design/Element.mjs',    target + '/design/Element.mjs'),
-				copy(STEALTH + '/browser/design/Widget.mjs',     target + '/design/Widget.mjs'),
-				copy(ROOT    + '/stealthify/source',             target + '/source'),
-				copy(STEALTH + '/stealth/source/parser/IP.mjs',  target + '/source/parser/IP.mjs'),
-				copy(STEALTH + '/stealth/source/parser/URL.mjs', target + '/source/parser/URL.mjs'),
-				copy(ROOT    + '/manifest.json',                 target + '/manifest.json')
+				copy(ROOT + '/defiant/chrome',              target + '/defiant/chrome'),
+				copy(ROOT + '/defiant/content',             target + '/defiant/content'),
+				copy(ROOT + '/defiant/design',              target + '/defiant/design'),
+				copy(ROOT + '/defiant/extern',              target + '/defiant/extern'),
+				copy(ROOT + '/defiant/manifest.json',       target + '/defiant/manifest.json'),
+				copy(ROOT + '/defiant/source',              target + '/defiant/source'),
+				bundle(ROOT + '/defiant/content/block.mjs', target + '/defiant/content/block.bundle.js'),
+				bundle(ROOT + '/defiant/content/clean.mjs', target + '/defiant/content/clean.bundle.js'),
 			].forEach((result) => results.push(result));
-
-		}
-
-
-		let buffer = read(target + '/manifest.json');
-		if (buffer !== null) {
-
-			let manifest = buffer.toString('utf8');
-			let files   = walk(target + '/source').map((url) => {
-				return url.substr(target.length + 1);
-			}).sort((a, b) => {
-				if (a < b) return -1;
-				if (b < a) return  1;
-				return 0;
-			});
-
-			// if (files.length > 0) {
-
-			// 	let index0 = service.indexOf('const ASSETS  = [') + 17;
-			// 	let index1 = service.indexOf('];', index0);
-
-			// 	if (index0 > 17 && index1 > 18) {
-			// 		service = service.substr(0, index0) + '\n\t\'' + files.join('\',\n\t\'') + '\'\n' + service.substr(index1);
-			// 	}
-
-			// 	results.push(write(target + '/service.js', Buffer.from(service, 'utf8')));
-
-			// }
 
 		}
 
@@ -386,6 +230,12 @@ export const build = (target) => {
 
 			return true;
 
+		} else {
+
+			console.error('stealth: build("' + _(target) + '"): fail');
+
+			return false;
+
 		}
 
 	}
@@ -395,34 +245,227 @@ export const build = (target) => {
 
 };
 
+const pack = async (target) => {
+
+	target = isString(target) ? target : TARGET;
 
 
-let args = process.argv.slice(1);
-if (args.includes(FILE) === true) {
+	console.info('defiant: pack("' + _(target) + '")');
 
 	let results = [];
 
-	if (args.includes('clean')) {
-		CACHE[TARGET] = true;
-		results.push(clean());
+
+	let sandbox_chromium = mktemp('defiant-chromium');
+	if (sandbox_chromium !== null) {
+
+		if (SIGNING_KEY !== null) {
+
+			// Chromium Extension
+			[
+				build(sandbox_chromium),
+				remove(sandbox_chromium + '/defiant/extern/make.mjs'),
+				exec('chromium --pack-extension=./defiant --pack-extension-key="' + SIGNING_KEY + '" --no-message-box', {
+					cwd: sandbox_chromium
+				})
+			].forEach((result) => {
+				results.push(result);
+			});
+
+		} else {
+
+			// Chromium Extension
+			[
+				build(sandbox_chromium),
+				remove(sandbox_chromium + '/defiant/extern/make.mjs'),
+				exec('chromium --pack-extension=./defiant --no-message-box', {
+					cwd: sandbox_chromium
+				})
+			].forEach((result) => {
+				results.push(result);
+			});
+
+		}
+
 	}
 
-	if (args.includes('build')) {
-		results.push(build());
+
+	// let sandbox_firefox = mktemp('defiant-firefox');
+	// TODO: Generate Firefox Extension file
+
+
+	if (results.includes(false) === false) {
+
+		return true;
+
+	} else {
+
+		console.error('defiant: pack("' + _(target) + '"): fail');
+
+		return false;
+
 	}
 
-	if (results.length === 0) {
-		CACHE[TARGET] = true;
-		results.push(clean());
-		results.push(build());
+};
+
+const patch_chromium_settings = (profile) => {
+
+	let preferences = null;
+
+	try {
+		preferences = JSON.parse(read(profile + '/Default/Preferences').buffer.toString('utf8'));
+	} catch (err) {
+		preferences = null;
+	}
+
+	if (isObject(preferences) === true) {
+
+		if (isObject(preferences['extensions']) === false) {
+			preferences['extensions'] = {};
+		}
+
+		if (isObject(preferences['extensions']['ui']) === false) {
+			preferences['extensions']['ui'] = {};
+		}
+
+		if (isBoolean(preferences['extensions']['ui']['developer_mode']) === false) {
+			preferences['extensions']['ui']['developer_mode'] = true;
+		}
+
+
+		if (preferences['extensions']['ui']['developer_mode'] === false) {
+			preferences['extensions']['ui']['developer_mode'] = true;
+		}
+
+	}
+
+	let result = write(profile + '/Default/Preferences', Buffer.from(JSON.stringify(preferences), 'utf8'));
+	if (result === true) {
+		return true;
+	}
+
+
+	return false;
+
+};
+
+const test = async (target) => {
+
+	target = isString(target) ? target : TARGET;
+
+
+	console.info('defiant: test("' + _(target) + '")');
+
+	let results = [
+		await build(target)
+	];
+
+	let sandbox_chromium = mktemp('defiant-chromium-profile');
+	if (sandbox_chromium !== null) {
+
+		[
+			await exec_then_kill('chromium --user-data-dir="' + sandbox_chromium + '"'),
+			patch_chromium_settings(sandbox_chromium),
+			exec([
+				'chromium',
+				'--user-data-dir="' + sandbox_chromium + '"',
+				'--load-extension="' + target + '/defiant"',
+				'--force-devtools-available'
+			].join(' '), {
+				cwd: sandbox_chromium
+			})
+		].forEach((result) => {
+			results.push(result);
+		});
+
+	} else {
+		results.push(false);
 	}
 
 
 	if (results.includes(false) === false) {
-		process.exit(0);
+
+		return true;
+
 	} else {
-		process.exit(1);
+
+		console.error('defiant: test("' + _(target) + '"): fail');
+
+		return false;
+
 	}
 
-}
+};
+
+
+
+(async (args) => {
+
+	if (args.includes(FILE) === true) {
+
+		let results = [];
+
+		if (args.includes('clean')) {
+			CACHE[target] = true;
+			results.push(await clean());
+		}
+
+		if (args.includes('build')) {
+			results.push(await build());
+		}
+
+		if (args.includes('test')) {
+			results.push(await test());
+		}
+
+		if (args.includes('pack')) {
+
+			let folder = args.find((v) => v.includes('/') && v !== FILE) || null;
+			if (folder !== null) {
+
+				let sandbox = null;
+
+				try {
+					sandbox = path.resolve(ROOT, folder);
+				} catch (err) {
+					sandbox = null;
+				}
+
+				if (sandbox !== null) {
+
+					results.push(await pack(sandbox));
+
+				} else {
+
+					console.error('Invalid parameter "' + folder + '". Please use a correct path.');
+					results.push(false);
+
+				}
+
+			} else {
+				results.push(await pack());
+			}
+
+		}
+
+		if (results.length === 0) {
+
+			CACHE[target] = true;
+			results.push(await clean());
+			results.push(await build());
+
+			// XXX: Don't pack by default
+			// results.push(await pack());
+
+		}
+
+
+		if (results.includes(false) === false) {
+			process.exit(0);
+		} else {
+			process.exit(1);
+		}
+
+	}
+
+})(process.argv.slice(1));
 

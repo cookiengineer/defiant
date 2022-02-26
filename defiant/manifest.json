@@ -5,6 +5,7 @@
 	"description": "Stay protected from Ads, JavaScript, Cookies and other Fingerprinting Techniques",
 	"icons": {
 		"16":  "design/icon-16.png",
+		"32":  "design/icon-32.png",
 		"48":  "design/icon-48.png",
 		"128": "design/icon-128.png"
 	},
@@ -14,9 +15,9 @@
 	},
 	"browser_action": {
 		"browser_style": false,
-		"default_title": "Site Modes",
+		"default_title": "Security Level",
 		"default_popup": "chrome/popup.html",
-		"default_icon": "design/icon-48.png"
+		"default_icon":  "design/icon-48.png"
 	},
 	"content_scripts": [
 		{
@@ -27,7 +28,7 @@
 			"all_frames": true,
 			"run_at": "document_start",
 			"js": [
-				"content/block.min.js"
+				"content/block.bundle.js"
 			]
 		}, {
 			"matches": [
@@ -37,7 +38,7 @@
 			"all_frames": true,
 			"run_at": "document_end",
 			"js": [
-				"content/clean.min.js"
+				"content/clean.bundle.js"
 			]
 		}
 	],

@@ -13,9 +13,8 @@
 
 # Build Script
 
-- [ ] Build the extension for Chromium
-- [ ] Build the extension for Firefox
-- [ ] Rewrite `make.mjs` to integrate `build.mjs` API calls for `esbuild`.
+- [ ] Import `blockers.json` from Stealth's Vendor Profile.
+- [ ] Build the Extension in `xpi` format for Firefox.
 
 # Test Script
 

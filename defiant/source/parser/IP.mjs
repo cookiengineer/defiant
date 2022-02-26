@@ -6,6 +6,7 @@ import { isArray, isBuffer, isObject, isString } from '../../extern/base.mjs';
 const PRIVATE_V4 = [
 
 	// RFC1122
+	'0.0.0.0',
 	'127.',
 
 	// RFC1918
@@ -71,6 +72,7 @@ const PRIVATE_V4 = [
 const PRIVATE_V6 = [
 
 	// RFC3513
+	'0000:0000:0000:0000:0000:0000:0000:0000',
 	'0000:0000:0000:0000:0000:0000:0000:0001',
 	'fe80:0000:0000:0000'
 
@@ -115,7 +117,7 @@ const render_ipv6 = function(ipv6) {
 
 };
 
-const validate_ipv4 = function(ipv4) {
+const parse_ipv4 = function(ipv4) {
 
 	let tmp   = ipv4.split('.').map((v) => parseInt(v, 10));
 	let valid = true;
@@ -132,8 +134,17 @@ const validate_ipv4 = function(ipv4) {
 
 		});
 
-		let class_d = tmp[tmp.length - 1];
-		if (class_d === 0 || class_d === 255) {
+		if (
+			tmp[0] === 0
+			&& tmp[1] === 0
+			&& tmp[2] === 0
+			&& tmp[3] === 0
+		) {
+			// Do Nothing
+		} else if (
+			tmp[3] === 0
+			|| tmp[3] === 255
+		) {
 			valid = false;
 		}
 
@@ -141,11 +152,16 @@ const validate_ipv4 = function(ipv4) {
 		valid = false;
 	}
 
-	return valid === true ? ipv4 : null;
+	if (valid === true) {
+		return ipv4;
+	}
+
+
+	return null;
 
 };
 
-const validate_ipv6 = function(ipv6) {
+const parse_ipv6 = function(ipv6) {
 
 	let valid = true;
 	let chunk = [];
@@ -217,6 +233,9 @@ const validate_ipv6 = function(ipv6) {
 
 	}
 
+	if (chunk.length !== 8) {
+		valid = false;
+	}
 
 	if (valid === true) {
 		return chunk.join(':');
@@ -290,15 +309,15 @@ const IP = {
 					let ip = payload.ip || '';
 					if (ip.includes(':') === true) {
 
-						let check = validate_ipv6(ip);
-						if (check !== null) {
+						let check = parse_ipv6(ip);
+						if (check === ip) {
 							return true;
 						}
 
 					} else if (ip.includes('.') === true) {
 
-						let check = validate_ipv4(ip);
-						if (check !== null) {
+						let check = parse_ipv4(ip);
+						if (check === ip) {
 							return true;
 						}
 
@@ -336,9 +355,13 @@ const IP = {
 				raw = raw.substr(7);
 			}
 
+			if (raw.includes('%') === true) {
+				raw = raw.substr(0, raw.indexOf('%'));
+			}
+
 			if (raw.includes(':') === true) {
 
-				let check = validate_ipv6(raw);
+				let check = parse_ipv6(raw);
 				if (check !== null) {
 
 					ip   = check;
@@ -358,7 +381,7 @@ const IP = {
 
 			} else if (raw.includes('.') === true) {
 
-				let check = validate_ipv4(raw);
+				let check = parse_ipv4(raw);
 				if (check !== null) {
 
 					ip   = check;
@@ -391,7 +414,7 @@ const IP = {
 
 	render: function(ip) {
 
-		ip = isObject(ip) ? ip : null;
+		ip = IP.isIP(ip) ? ip : null;
 
 
 		if (ip !== null) {

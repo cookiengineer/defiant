@@ -4,7 +4,7 @@ import { IP                                                         } from '../.
 
 
 
-const TOPLEVELDOMAINS = [
+const DOUBLE_TOPLEVELDOMAINS = [
 	'aba.ae',
 	'ac.id',
 	'ac.in',
@@ -181,6 +181,29 @@ const TOPLEVELDOMAINS = [
 	'zz.mu'
 ];
 
+const INVALID_TOPLEVELDOMAINS = [
+
+	// DNS RFC2606
+	'domain',
+	'example',
+	'invalid',
+	'local',
+	'localhost',
+	'test',
+
+	// Basically RFC-violating companies
+	'belkin',
+	'corp',
+	'home',
+	'host',
+	'lan',
+	'localdomain',
+	'mail',
+	'wpad',
+	'workgroup'
+
+];
+
 const MIME_DEFAULT = {
 	ext:    'bin',
 	type:   'other',
@@ -281,16 +304,18 @@ const MIME = [
 	{ ext: 'webm', type: 'video', binary: true, format: 'video/webm'      },
 
 	// other
-	{ ext: '7z',   type: 'other', binary: true, format: 'application/x-7z-compressed'       },
-	{ ext: 'bz',   type: 'other', binary: true, format: 'application/x-bzip'                },
-	{ ext: 'bz2',  type: 'other', binary: true, format: 'application/x-bzip2'               },
-	{ ext: 'epub', type: 'other', binary: true, format: 'application/epub+zip'              },
-	{ ext: 'gz',   type: 'other', binary: true, format: 'application/x-gzip'                },
-	{ ext: 'jar',  type: 'other', binary: true, format: 'application/jar-archive'           },
-	{ ext: 'pac',  type: 'other', binary: true, format: 'application/x-ns-proxy-autoconfig' },
-	{ ext: 'rar',  type: 'other', binary: true, format: 'application/x-rar-compressed'      },
-	{ ext: 'tar',  type: 'other', binary: true, format: 'application/x-tar'                 },
-	{ ext: 'zip',  type: 'other', binary: true, format: 'application/zip'                   }
+	{ ext: '7z',     type: 'other', binary: true, format: 'application/x-7z-compressed'       },
+	{ ext: 'bz',     type: 'other', binary: true, format: 'application/x-bzip'                },
+	{ ext: 'bz2',    type: 'other', binary: true, format: 'application/x-bzip2'               },
+	{ ext: 'epub',   type: 'other', binary: true, format: 'application/epub+zip'              },
+	{ ext: 'gz',     type: 'other', binary: true, format: 'application/x-gzip'                },
+	{ ext: 'jar',    type: 'other', binary: true, format: 'application/jar-archive'           },
+	{ ext: 'pac',    type: 'other', binary: true, format: 'application/x-ns-proxy-autoconfig' },
+	{ ext: 'pcap',   type: 'other', binary: true, format: 'application/vnd.tcpdump.pcap'      },
+	{ ext: 'pcapng', type: 'other', binary: true, format: 'application/x-pcapng'              },
+	{ ext: 'rar',    type: 'other', binary: true, format: 'application/x-rar-compressed'      },
+	{ ext: 'tar',    type: 'other', binary: true, format: 'application/x-tar'                 },
+	{ ext: 'zip',    type: 'other', binary: true, format: 'application/zip'                   }
 
 ];
 
@@ -516,19 +541,19 @@ const URL = {
 			let found = policy.policies.find((policy) => {
 
 				let pattern = policy.path;
-				if (pattern.startsWith('*')) {
+				if (pattern.startsWith('*') === true) {
 
-					return url.path.endsWith(pattern.substr(1));
+					return url.path.endsWith(pattern.substr(1)) === true;
 
-				} else if (pattern.endsWith('*')) {
+				} else if (pattern.endsWith('*') === true) {
 
-					return url.path.startsWith(pattern.substr(0, pattern.length - 1));
+					return url.path.startsWith(pattern.substr(0, pattern.length - 1)) === true;
 
-				} else if (pattern.includes('*')) {
+				} else if (pattern.includes('*') === true) {
 
 					return (
-						url.path.startsWith(pattern.split('*').shift())
-						&& url.path.endsWith(pattern.split('*').pop())
+						url.path.startsWith(pattern.split('*').shift()) === true
+						&& url.path.endsWith(pattern.split('*').pop()) === true
 					);
 
 				} else {
@@ -573,27 +598,27 @@ const URL = {
 
 						let pattern = patterns[p];
 
-						if (pattern.key.startsWith('*')) {
-							valid_key = parameter.key.endsWith(pattern.key.substr(1));
-						} else if (pattern.key.endsWith('*')) {
-							valid_key = parameter.key.startsWith(pattern.key.substr(0, pattern.key.length - 1));
-						} else if (pattern.key.includes('*')) {
+						if (pattern.key.startsWith('*') === true) {
+							valid_key = parameter.key.endsWith(pattern.key.substr(1)) === true;
+						} else if (pattern.key.endsWith('*') === true) {
+							valid_key = parameter.key.startsWith(pattern.key.substr(0, pattern.key.length - 1)) === true;
+						} else if (pattern.key.includes('*') === true) {
 							valid_key = (
-								parameter.key.startsWith(pattern.key.split('*')[0])
-								&& parameter.key.endsWith(pattern.key.split('*')[1])
+								parameter.key.startsWith(pattern.key.split('*')[0]) === true
+								&& parameter.key.endsWith(pattern.key.split('*')[1]) === true
 							);
 						} else {
 							valid_key = parameter.key === pattern.key;
 						}
 
-						if (pattern.val.startsWith('*')) {
-							valid_val = parameter.val.endsWith(pattern.val.substr(1));
-						} else if (pattern.val.endsWith('*')) {
-							valid_val = parameter.val.startsWith(pattern.val.substr(0, pattern.val.length - 1));
-						} else if (pattern.val.includes('*')) {
+						if (pattern.val.startsWith('*') === true) {
+							valid_val = parameter.val.endsWith(pattern.val.substr(1)) === true;
+						} else if (pattern.val.endsWith('*') === true) {
+							valid_val = parameter.val.startsWith(pattern.val.substr(0, pattern.val.length - 1)) === true;
+						} else if (pattern.val.includes('*') === true) {
 							valid_val = (
-								parameter.val.startsWith(pattern.val.split('*')[0])
-								&& parameter.val.endsWith(pattern.val.split('*')[1])
+								parameter.val.startsWith(pattern.val.split('*')[0]) === true
+								&& parameter.val.endsWith(pattern.val.split('*')[1]) === true
 							);
 						} else {
 							valid_val = parameter.val === pattern.val;
@@ -780,11 +805,14 @@ const URL = {
 
 			} else if (
 				protocol === 'dns'
+				|| protocol === 'dnsh'
 				|| protocol === 'dnss'
 				|| protocol === 'ftps'
 				|| protocol === 'ftp'
 				|| protocol === 'https'
 				|| protocol === 'http'
+				|| protocol === 'mdns'
+				|| protocol === 'whois'
 				|| protocol === 'wss'
 				|| protocol === 'ws'
 				|| protocol === 'socks'
@@ -1045,7 +1073,7 @@ const URL = {
 				let tmp_tld = domain.split('.').slice(-2).join('.');
 				let tmp_sub = domain.split('.').slice(0, -2);
 
-				if (TOPLEVELDOMAINS.includes(tmp_tld) === true && tmp_sub.length > 0) {
+				if (DOUBLE_TOPLEVELDOMAINS.includes(tmp_tld) === true && tmp_sub.length > 0) {
 
 					domain = tmp_sub.pop() + '.' + tmp_tld;
 
@@ -1096,6 +1124,26 @@ const URL = {
 
 			}
 
+			if (domain !== null && domain !== 'localhost') {
+
+				if (domain.includes('.') === true) {
+
+					let tld = domain.split('.').pop();
+					if (INVALID_TOPLEVELDOMAINS.includes(tld) === true) {
+						domain    = null;
+						subdomain = null;
+					}
+
+				} else {
+
+					if (INVALID_TOPLEVELDOMAINS.includes(domain) === true) {
+						domain    = null;
+						subdomain = null;
+					}
+
+				}
+
+			}
 
 			if (path !== null && path.includes('.') === true) {
 
@@ -1128,6 +1176,8 @@ const URL = {
 					// Do nothing
 				} else if (protocol === 'dns') {
 					port = 53;
+				} else if (protocol === 'dnsh') {
+					port = 443;
 				} else if (protocol === 'dnss') {
 					port = 853;
 				} else if (protocol === 'ftps') {
@@ -1138,6 +1188,10 @@ const URL = {
 					port = 443;
 				} else if (protocol === 'http') {
 					port = 80;
+				} else if (protocol === 'mdns') {
+					port = 5353;
+				} else if (protocol === 'whois') {
+					port = 43;
 				} else if (protocol === 'wss') {
 					port = 443;
 				} else if (protocol === 'ws') {
@@ -1233,6 +1287,12 @@ const URL = {
 						link += ':' + url.port;
 					}
 
+				} else if (url.protocol === 'dnsh') {
+
+					if (url.port !== 443) {
+						link += ':' + url.port;
+					}
+
 				} else if (url.protocol === 'dnss') {
 
 					if (url.port !== 853) {
@@ -1260,6 +1320,18 @@ const URL = {
 				} else if (url.protocol === 'http') {
 
 					if (url.port !== 80) {
+						link += ':' + url.port;
+					}
+
+				} else if (url.protocol === 'mdns') {
+
+					if (url.port !== 5353) {
+						link += ':' + url.port;
+					}
+
+				} else if (url.protocol === 'whois') {
+
+					if (url.port !== 43) {
 						link += ':' + url.port;
 					}
 
@@ -1418,6 +1490,8 @@ const URL = {
 						// Do nothing
 					} else if (protocol === 'dns') {
 						port = 53;
+					} else if (protocol === 'dnsh') {
+						port = 443;
 					} else if (protocol === 'dnss') {
 						port = 853;
 					} else if (protocol === 'ftps') {
@@ -1428,6 +1502,10 @@ const URL = {
 						port = 443;
 					} else if (protocol === 'http') {
 						port = 80;
+					} else if (protocol === 'mdns') {
+						port = 5353;
+					} else if (protocol === 'whois') {
+						port = 43;
 					} else if (protocol === 'wss') {
 						port = 443;
 					} else if (protocol === 'ws') {
