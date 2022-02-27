@@ -1,0 +1,129 @@
+
+body {
+	margin: 0px;
+	padding: 0px;
+	user-select: none;
+}
+
+h2 {
+	display: block;
+	margin: 0px 0px 16px 0px;
+	padding: 0px;
+	font-family: 'crystalline';
+	font-size: 24px;
+	font-weight: 500;
+	line-height: 32px;
+	text-transform: uppercase;
+	text-align: center;
+}
+
+h3 {
+	display: block;
+	margin: 48px 0px 16px 0px;
+	padding: 0px;
+	font-family: 'crystalline';
+	font-size: 20px;
+	font-weight: 500;
+	line-height: 32px;
+	text-transform: uppercase;
+	text-align: left;
+	border-bottom: 1px solid var(--element-default-color);
+}
+
+h3:first-child {
+	margin-top: 0px;
+}
+
+figure {
+	display: block;
+	margin: 16px 0px;
+	padding: 0px;
+	text-align: center;
+}
+
+figure img {
+	border: 1px solid #ffffff;
+}
+
+p {
+	font-size: 16px;
+	margin: 0px 0px 1em 0px;
+	padding: 0px;
+	text-align: justify;
+}
+
+q {
+	padding: 4px 4px;
+	background: #222222;
+	font-weight: bold;
+}
+
+q:before,
+q:after {
+	content: '';
+}
+
+ul {
+	display: block;
+	margin: 0px;
+	padding: 0px;
+	font-size: 16px;
+	list-style: disc;
+}
+
+ol {
+	display: block;
+	margin: 0px;
+	padding: 0px;
+	font-size: 16px;
+	list-style: decimal;
+}
+
+ul li,
+ol li {
+	display: list-item;
+	margin: 0px 0px 0px 16px;
+	padding: 0px;
+	line-height: 24px;
+}
+
+
+
+section {
+	display: block;
+	width: 1024px;
+	margin: 128px auto 0px auto;
+}
+
+section:first-of-type {
+	margin-top: 64px;
+}
+
+section:last-of-type {
+	margin-bottom: 64px;
+}
+
+section article {
+	display: block;
+	width: 640px;
+	margin: 0px auto;
+	padding: 16px;
+	border: 1px solid var(--element-default-color);
+	border-radius: 8px;
+	overflow: hidden auto;
+}
+
+
+
+button[data-action="remove"]:before { content: '\e14c'; }
+
+
+
+@media (max-width: 1280px) {
+
+	section {
+		width: auto;
+	}
+
+}
+

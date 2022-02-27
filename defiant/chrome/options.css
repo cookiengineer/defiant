@@ -18,6 +18,7 @@ h2 {
 }
 
 p {
+	font-size: 16px;
 	margin: 0px 0px 1em 0px;
 	padding: 0px;
 	text-align: justify;
@@ -192,12 +193,7 @@ section#distributors article > table > tbody > tr > td:nth-of-type(2) {
 
 
 
-button[data-action="remove"]:before      { content: '\e14c'; }
-input[type="radio"][value="none"]:before { content: '\e14c'; }
-input[type="radio"][value="tab"]:before  { content: '\e425'; }
-input[type="radio"][value="day"]:before  { content: '\e002'; }
-input[type="radio"][value="week"]:before { content: '\e002'; }
-input[type="radio"][value="date"]:before { content: '\e916'; }
+button[data-action="remove"]:before { content: '\e14c'; }
 
 
 

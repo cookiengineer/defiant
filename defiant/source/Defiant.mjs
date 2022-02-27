@@ -1,6 +1,7 @@
 
 import { Emitter, isArray, isBoolean, isObject, isString } from '../extern/base.mjs';
 import { Interceptor                                     } from '../source/Interceptor.mjs';
+import { Curator                                         } from '../source/Curator.mjs';
 import { Storage                                         } from '../source/Storage.mjs';
 import { Tab                                             } from '../source/Tab.mjs';
 import { URL                                             } from '../source/parser/URL.mjs';
@@ -54,6 +55,7 @@ const Defiant = function(settings, api) {
 	}, settings);
 
 
+	this.curator     = new Curator(this.settings, this, api);
 	this.interceptor = new Interceptor(this.settings, this, api);
 	this.storage     = new Storage(this.settings, this, api);
 	this.tab         = null;
@@ -64,6 +66,7 @@ const Defiant = function(settings, api) {
 
 
 	this.storage.read(() => {
+		this.curator.connect();
 		this.interceptor.connect();
 	});
 
@@ -83,8 +86,9 @@ Defiant.from = function(json) {
 		if (type !== null && data !== null) {
 
 			let defiant = new Defiant({
-				debug:  isBoolean(data.debug) ? data.debug  : null,
-				levels: isArray(data.levels)  ? data.levels : null
+				debug:    isBoolean(data.debug)   ? data.debug    : null,
+				levels:   isArray(data.levels)    ? data.levels   : null,
+				policies: isObject(data.policies) ? data.policies : null
 			});
 
 			return defiant;

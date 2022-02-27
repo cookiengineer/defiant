@@ -1,11 +1,10 @@
 
-# Defiant Chrome/Chromium Browser Extension
+# Defiant Browser Extension
 
-**Stay protected from Ads, JavaScript, Cookies and other Fingerprinting Techniques**
+## Stay protected from Ads, Cookies, JavaScript and other Tracking Techniques
 
-
-The Defiant Chromium Browser Extension tries to put the control over
-website behaviours back into the hands of users, and not developers.
+The Defiant Browser Extension tries to put the control over website
+behaviours back into the hands of users, and not developers.
 
 Its concept works with Trust Levels, whereas the defaulted Trust Level
 is `Zero` and doesn't allow anything malicious to happen. Incrementing
@@ -13,51 +12,58 @@ the Trust Level to a higher one will enable more risky features to make
 the Website or Web App work.
 
 
-## Trust Level: Zero
+## User Interface
 
-### Best for Static Websites (default)
+[Popup UI](/defiant/chrome/user-guide.png)
 
-- Disable HTTP Location/Refresh redirects.
-- Disable Link Prefetching from all domains.
-- Disable Frames from all domains.
-- Disable Cookies from all domains.
-- Disable JS from all domains.
-- Enable Images from first-party or second-party domains.
-- Enable Audios from first-party or second-party domains.
-- Enable Videos from first-party or second-party domains.
-- Enable CSS from first-party or second-party domains or known CDNs.
+The [User Guide](/defiant/chrome/user-guide.html) contains more instructions
+on how to use the Defiant Browser Extension.
 
-## Trust Level: Alpha
 
-### Best for Interactive Websites
+## Trust Levels
 
-- Enable Images from first-party or second-party domains or known CDNs.
-- Enable Audios from first-party or second-party domains or known CDNs.
-- Enable Videos from first-party or second-party domains or known CDNs.
-- Enable JS from first-party or second-party domains or known CDNs.
-- Enable Cookies from first-party or second-party domains for the current session.
+The Defiant Browser Extension operates on the concept of trust levels.
+By default, no website is trusted (Level: Zero). You (as the user) are
+in charge of which website is to be trusted.
 
-## Trust Level: Beta
+- **Level: Zero** is for Static Websites
+- **Level: Alpha** is for Interactive Websites
+- **Level: Beta** is for Web Apps
+- **Level: Gamma** is for Social Media Apps
 
-### Best for Social Web Apps
+**Level: Zero**
 
-- Enable HTTP Location/Refresh redirects to first-party or second-party domains.
-- Enable Link Prefetching to first-party or second-party domains or known CDNs.
-- Enable Frames from first-party or second-party domains.
+- Enable Media from first-party or second-party domains.
+- Enable Stylesheets from first-party or second-party domains or known CDNs.
+- Disable everything else.
+
+**Level: Alpha**
+
+- Enable Media from first-party and second-party domains or known CDNs.
+- Enable Stylesheets from first-party and second-party domains or known CDNs.
+- Enable JavaScript from first-party or second-party domains or known CDNs.
+- Enable Cookies from first-party or second-party domains.
+- Limit Cookies to the current browsing session.
+
+**Level: Beta**
+
+- Enable Media from first-party and second-party domains or known CDNs.
+- Enable Stylesheets from first-party and second-party domains or known CDNs.
+- Enable JavaScript from first-party or second-party domains or known CDNs.
 - Enable Cookies from first-party or second-party domains or known CDNs.
+- Enable Link Prefetching from first-party or second-party domains or known CDNs.
+- Enable Location Redirects from first-party or second-party domains or known CDNs.
+- Enable Frames from first-party or second-party domains.
 
-## Trust Level: Gamma
+**Level: Gamma**
 
-### Best for Social Media Apps
-
-- Enable HTTP Location/Refresh redirects to all domains.
-- Enable Link Prefetching from all domains.
-- Enable Images from all domains.
-- Enable Videos from all domains.
-- Enable Frames from all domains.
+- Enable Media from all domains.
+- Enable Stylesheets from all domains.
+- Enable JavaScript from all domains.
 - Enable Cookies from all domains.
-- Enable JS from all domains.
-- Enable CSS from all domains.
+- Enable Link Prefetching from all domains.
+- Enable Location Redirects from all domains.
+- Enable Frames from all domains.
 
 
 # Development Guide

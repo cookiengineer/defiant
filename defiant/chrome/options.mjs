@@ -6,8 +6,7 @@ import { URL     } from '../source/parser/URL.mjs';
 
 
 
-const console    = window.console;
-// const console    = API['extension'].getBackgroundPage().console || window.console;
+const console    = API['extension'].getBackgroundPage().console || window.console;
 const DEFIANT    = API['extension'].getBackgroundPage().DEFIANT || null;
 const STATISTICS = {};
 const TABLES     = {

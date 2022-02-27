@@ -15,12 +15,16 @@
 		"chrome":  true
 	},
 	"overrides": [{
-		"files": [ "extern/base.mjs" ],
+		"files": [
+			"extern/base.mjs"
+		],
 		"rules": {
 			"no-undef": "off"
 		}
 	}, {
-		"files": [ "content/block.mjs" ],
+		"files": [
+			"content/block.mjs"
+		],
 		"rules": {
 			"no-unused-vars": [
 				"error", {
@@ -29,7 +33,11 @@
 			]
 		}
 	}, {
-		"files": [ "chrome/background.mjs", "chrome/popup.mjs" ],
+		"files": [
+			"chrome/background.mjs",
+			"chrome/options.mjs",
+			"chrome/popup.mjs"
+		],
 		"rules": {
 			"no-unused-vars": [
 				"error", {

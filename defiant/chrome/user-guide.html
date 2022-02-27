@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Defiant - User Guide</title>
+		<style>
+
+			@import url("../design/common/index.css");
+			@import url("../design/common/theme.css");
+			@import url("../design/common/elements.css");
+			@import url("../chrome/user-guide.css");
+
+		</style>
+	</head>
+	<body data-page="options">
+		<section>
+			<h2>User Interface</h2>
+			<article>
+				<h3>Extension Popup</h3>
+				<figure>
+					<img src="./user-guide.png" width="320" height="148">
+				</figure>
+				<p>
+					The Extension Popup is optimized for quick user interactions and
+					consists of the following interface elements:
+				</p>
+				<ol>
+					<li>
+						The <q>Trust Level</q> range slider allows to quickly modify the
+						level of trust for the currently opened website in the active Tab.
+					</li>
+					<li>
+						The <q>Confirm</q> button allows to apply the changed trust levels
+						which leads to a Tab reload after the button is pressed.
+					</li>
+					<li>
+						The <q>Options</q> button allows to open the Defiant Extension's
+						<a href="./options.html">Options Page</a> in a new Tab.
+					</li>
+					<li>
+						The <q>Open in Incognito Window</q> button allows to open
+						the currently visited website in a temporary Incognito
+						window.
+					</li>
+				</ol>
+			</article>
+		</section>
+		<section>
+			<h2>Trust Levels</h2>
+			<article>
+				<p>
+					The Defiant Browser Extension works on the concept of trust levels.
+					By default, no website is trusted. You (as the user) are in charge
+					of which website is to be trusted.
+				</p>
+				<h3>Trust Level: Zero</h3>
+				<p>
+					This trust level is best for Static Websites. It is the defaulted
+					trust level. No persistent tracking data of any kind can be set by
+					the Website.
+				</p>
+				<ul>
+					<li>Enable Media from first-party or second-party domains.</li>
+					<li>Enable Stylesheets from first-party and second-party domains or known <abbr title="Content Distributor Networks">CDNs</abbr>.</li>
+				</ul>
+				<h3>Trust Level: Alpha</h3>
+				<p>
+					This trust level is best for Interactive Websites. It allows dynamic
+					content while trying to preserve your privacy as good as possible.
+					Persistent tracking data is limited to the current Browsing Session,
+					and the lifetime of Cookies is modified so that they are cleared
+					automatically when the Browser is closed.
+				</p>
+				<ul>
+					<li>Enable Media from first-party or second-party domains or known <abbr title="Content Distributor Networks">CDNs</abbr>.</li>
+					<li>Enable Stylesheets from first-party and second-party domains or known <abbr title="Content Distributor Networks">CDNs</abbr>.</li>
+					<li>Enable JavaScript from first-party and second-party domains or known <abbr title="Content Distributor Networks">CDNs</abbr>.</li>
+					<li>Enable Cookies from first-party or second-party domains.</li>
+					<li>Limit Cookies to the current browsing session.</li>
+				</ul>
+				<h3>Trust Level: Beta</h3>
+				<p>
+					This trust level is best for Web Apps that require third-party
+					Authentication Services or Login Providers. Persistent data is
+					permanently stored and won't be cleared by the Defiant Browser
+					Extension.
+				</p>
+				<ul>
+					<li>Enable Media from first-party or second-party domains or known <abbr title="Content Distributor Networks">CDNs</abbr>.</li>
+					<li>Enable Stylesheets from first-party and second-party domains or known <abbr title="Content Distributor Networks">CDNs</abbr>.</li>
+					<li>Enable JavaScript from first-party and second-party domains or known <abbr title="Content Distributor Networks">CDNs</abbr>.</li>
+					<li>Enable Cookies from first-party and second-party domains or known <abbr title="Content Distributor Networks">CDNs</abbr>.</li>
+					<li>Enable Link Prefetching from first-party and second-party domains or known <abbr title="Content Distributor Networks">CDNs</abbr>.</li>
+					<li>Enable Location Redirects from first-party and second-party domains or known <abbr title="Content Distributor Networks">CDNs</abbr>.</li>
+					<li>Enable Frames from first-party and second-party domains.</li>
+				</ul>
+				<h3>Trust Level: Gamma</h3>
+				<p>
+					This trust level is best for Social Media Apps that require a
+					lot of tracking mechanisms that do cross-domain communication.
+					Persistent data is permanently stored and won't be cleared by
+					the Defiant Browser Extension.
+					<br>
+					Use this Trust Level only when you are absolutely sure about
+					the consequences of sharing your identity and fingerprint.
+				</p>
+				<ul>
+					<li>Enable Media from all domains.</li>
+					<li>Enable Stylesheets from all domains.</li>
+					<li>Enable JavaScript from all domains.</li>
+					<li>Enable Cookies from all domains.</li>
+					<li>Enable Link Prefetching all domains.</li>
+					<li>Enable Location Redirects from all domains.</li>
+					<li>Enable Frames from all domains.</li>
+				</ul>
+			</article>
+		</section>
+	</body>
+</html>

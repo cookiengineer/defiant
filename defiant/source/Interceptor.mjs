@@ -1,8 +1,8 @@
 
-import { Emitter, isArray, isNumber, isObject, isString } from '../extern/base.mjs';
-import { isDefiant                                      } from '../source/Defiant.mjs';
-import { COOKIE                                         } from '../source/parser/COOKIE.mjs';
-import { URL                                            } from '../source/parser/URL.mjs';
+import { isArray, isNumber, isObject, isString } from '../extern/base.mjs';
+import { isDefiant                             } from '../source/Defiant.mjs';
+import { COOKIE                                } from '../source/parser/COOKIE.mjs';
+import { URL                                   } from '../source/parser/URL.mjs';
 
 
 
@@ -615,9 +615,6 @@ const Interceptor = function(settings, defiant, api) {
 
 	};
 
-
-	Emitter.call(this);
-
 };
 
 
@@ -643,7 +640,7 @@ Interceptor.from = function(json) {
 };
 
 
-Interceptor.prototype = Object.assign({}, Emitter.prototype, {
+Interceptor.prototype = {
 
 	[Symbol.toStringTag]: 'Interceptor',
 
@@ -741,7 +738,7 @@ Interceptor.prototype = Object.assign({}, Emitter.prototype, {
 
 	}
 
-});
+};
 
 
 export { Interceptor };

@@ -2,9 +2,17 @@
 export const API = (() => {
 
 	if (typeof browser !== 'undefined') {
-		return browser;
+
+		return Object.assign({}, browser, {
+			[Symbol.for('BROWSER')]: 'Firefox'
+		});
+
 	} else if (typeof chrome !== 'undefined') {
-		return chrome;
+
+		return Object.assign({}, chrome, {
+			[Symbol.for('BROWSER')]: 'Chrome'
+		});
+
 	}
 
 	return null;

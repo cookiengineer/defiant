@@ -2,7 +2,7 @@
 	"author": "Cookie Engineer",
 	"name": "Defiant",
 	"version": "0.0.1",
-	"description": "Stay protected from Ads, JavaScript, Cookies and other Fingerprinting Techniques",
+	"description": "Stay protected from Ads, Cookies, JavaScript and other Tracking Techniques",
 	"icons": {
 		"16":  "design/icon-16.png",
 		"32":  "design/icon-32.png",
@@ -43,6 +43,7 @@
 		}
 	],
 	"permissions": [
+		"browsingData",
 		"cookies",
 		"downloads",
 		"privacy",
