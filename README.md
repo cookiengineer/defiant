@@ -14,7 +14,7 @@ the Website or Web App work.
 
 ## User Interface
 
-[Popup UI](/defiant/chrome/user-guide.png)
+![Popup UI](/defiant/chrome/user-guide.png)
 
 The [User Guide](/defiant/chrome/user-guide.html) contains more instructions
 on how to use the Defiant Browser Extension.
