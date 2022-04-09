@@ -395,6 +395,14 @@ select[multiple]:focus {
 	background: var(--element-focus-background);
 }
 
+option {
+	margin: 0px;
+	padding: 0px;
+	color: var(--layout-default-color);
+	background: var(--layout-default-background);
+	border: 1px solid var(--surface-default-color);
+}
+
 
 
 textarea {

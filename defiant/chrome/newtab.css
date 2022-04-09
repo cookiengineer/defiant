@@ -1,0 +1,136 @@
+
+body {
+	margin: 0px;
+	padding: 0px;
+}
+
+h2 {
+	display: block;
+	margin: 0px 0px 16px 0px;
+	padding: 0px;
+	font-family: 'crystalline';
+	font-size: 24px;
+	font-weight: 500;
+	line-height: 32px;
+	text-transform: uppercase;
+	text-align: center;
+}
+
+p {
+	margin: 0px 0px 1em 0px;
+	padding: 0px;
+	font-size: 16px;
+	text-align: justify;
+}
+
+header {
+	position: fixed;
+	margin: 0px;
+	padding: 8px;
+	top: 0px;
+	right: 0px;
+	bottom: auto;
+	left: 0px;
+	z-index: 2;
+	background: #222222;
+	border-bottom: 1px solid #ffffff;
+	user-select: none;
+}
+
+header > h2 {
+	display: inline-block;
+	width: 92px;
+	margin: 0px 8px 0px 0px;
+	line-height: 32px;
+	text-align: left;
+	vertical-align: top;
+}
+
+header > input[type="text"] {
+	display: inline-block;
+	width: calc(100% - 92px - 128px - 32px - 32px);
+	margin: 0px 8px 0px 0px;
+	text-align: center;
+	vertical-align: top;
+}
+
+header > select {
+	display: inline-block;
+	width: 128px;
+	margin: 0px 8px 0px 0px;
+	padding-left: 48px;
+	padding-right: 8px;
+}
+
+button[name="search"]:before {
+	content: '\e8b6';
+}
+
+section[id="results"] {
+	position: fixed;
+	top: 48px;
+	right: 0px;
+	bottom: 0px;
+	left: 0px;
+	z-index: 1;
+	overflow: auto;
+}
+
+section[id="results"] > ul {
+	display: block;
+	width: 640px;
+	height: auto;
+	margin: 0px auto;
+	padding: 0px;
+}
+
+section[id="results"] > ul li {
+	display: block;
+	margin: 0px 0px 0px 0px;
+	padding: 1em;
+	font-family: 'monospace';
+	font-size: 16px;
+	line-height: 24px;
+	text-align: justify;
+}
+
+section[id="results"] > ul li:hover {
+	background: var(--element-active-background);
+}
+
+section[id="results"] > ul li img {
+	display: inline-block;
+	width: auto;
+	height: auto;
+	max-width: 64px;
+	max-height: 64px;
+	margin: 0px 16px 0px 0px;
+	padding: 0px;
+	border: unset;
+	vertical-align: top;
+	float: left;
+}
+
+section[id="results"] > ul li p {
+	display: block;
+	margin: 0px;
+	padding: 0px;
+	vertical-align: top;
+}
+
+section[id="results"] > ul li div {
+	display: block;
+	text-align: left;
+}
+
+section[id="results"] > ul li div:last-of-type {
+	text-align: right;
+}
+
+section[id="results"] > ul li small {
+	display: block;
+	font-family: 'monospace';
+	font-size: 12px;
+	line-height: 24px;
+}
+

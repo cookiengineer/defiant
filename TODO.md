@@ -19,9 +19,6 @@
 # TODO
 
 - [ ] Add support for generation of `Content-Security-Policy` to `Interceptor.mjs` based on Trust Level.
-- [ ] Allow to enforce maximum Cookie lifetime, which sets the cookie lifetime globally
-- [ ] Add support to clear localStorage, sessionStorage, IndexedDB and WebSQL databases if their domains
-      do not contain any trust level or are below the gamma trust level.
 
 ## CSS Filters
 

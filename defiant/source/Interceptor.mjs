@@ -5,6 +5,10 @@ import { COOKIE                                } from '../source/parser/COOKIE.m
 import { URL                                   } from '../source/parser/URL.mjs';
 
 
+import { redirect as redirect_imgur  } from '../source/site/imgur.mjs';
+import { redirect as redirect_reddit } from '../source/site/reddit.mjs';
+
+
 
 export const isInterceptor = function(obj) {
 	return Object.prototype.toString.call(obj) === '[object Interceptor]';
@@ -104,115 +108,144 @@ const Interceptor = function(settings, defiant, api) {
 			level  = tab.level.level;
 		}
 
-
 		if (
-			url.mime.format === 'text/css'
+			tab !== null
+			&& tab.url.link === 'chrome://new-tab-page/'
 		) {
 
-			type = 'style';
-
-			if (level === 'zero' || level === 'alpha' || level === 'beta') {
-
-				if (this.defiant.isDomain(domain, url_domain) === true) {
-					blocked = false;
-				} else if (this.defiant.isCDN(url_domain) === true) {
-					blocked = false;
-				} else {
-					report  = true;
-					blocked = true;
-				}
-
-			} else if (level === 'gamma') {
-				blocked = false;
-			}
-
-		} else if (
-			url.mime.format === 'application/javascript'
-			|| url.mime.format === 'application/typescript'
-		) {
-
-			type = 'script';
-
-			if (level === 'zero') {
+			if (this.defiant.isBlocked(url_domain) === true) {
 				blocked = true;
-			} else if (level === 'alpha' || level === 'beta') {
-
-				if (this.defiant.isDomain(domain, url_domain) === true) {
-					blocked = false;
-				} else if (this.defiant.isCDN(url_domain) === true) {
-					blocked = false;
-				} else {
-					report  = true;
-					blocked = true;
-				}
-
-			} else if (level === 'gamma') {
-				blocked = false;
 			}
 
-		} else if (
-			url.mime.format.startsWith('image/') === true
-			|| url.mime.format.startsWith('audio/') === true
-			|| url.mime.format.startsWith('video/') === true
-		) {
+		} else {
 
-			type = 'media';
+			if (
+				url.mime.format === 'text/css'
+			) {
 
-			if (level === 'zero') {
+				type = 'style';
 
-				if (this.defiant.isDomain(domain, url_domain) === true) {
+				if (level === 'zero' || level === 'alpha' || level === 'beta') {
+
+					if (this.defiant.isDomain(domain, url_domain) === true) {
+						blocked = false;
+					} else if (this.defiant.isCDN(url_domain) === true) {
+						blocked = false;
+					} else {
+						report  = true;
+						blocked = true;
+					}
+
+				} else if (level === 'gamma') {
 					blocked = false;
-				} else {
-					report  = true;
-					blocked = true;
 				}
 
-			} else if (level === 'alpha' || level === 'beta') {
+			} else if (
+				url.mime.format === 'application/javascript'
+				|| url.mime.format === 'application/typescript'
+			) {
 
-				if (this.defiant.isDomain(domain, url_domain) === true) {
-					blocked = false;
-				} else if (this.defiant.isCDN(url_domain) === true) {
-					blocked = false;
-				} else {
-					report  = true;
+				type = 'script';
+
+				if (level === 'zero') {
 					blocked = true;
+				} else if (level === 'alpha' || level === 'beta') {
+
+					if (this.defiant.isDomain(domain, url_domain) === true) {
+						blocked = false;
+					} else if (this.defiant.isCDN(url_domain) === true) {
+						blocked = false;
+					} else {
+						report  = true;
+						blocked = true;
+					}
+
+				} else if (level === 'gamma') {
+					blocked = false;
 				}
 
-			} else if (level === 'gamma') {
-				blocked = false;
+			} else if (
+				url.mime.format.startsWith('image/') === true
+				|| url.mime.format.startsWith('audio/') === true
+				|| url.mime.format.startsWith('video/') === true
+			) {
+
+				type = 'media';
+
+				if (level === 'zero') {
+
+					if (this.defiant.isDomain(domain, url_domain) === true) {
+						blocked = false;
+					} else {
+						report  = true;
+						blocked = true;
+					}
+
+				} else if (level === 'alpha' || level === 'beta') {
+
+					if (this.defiant.isDomain(domain, url_domain) === true) {
+						blocked = false;
+					} else if (this.defiant.isCDN(url_domain) === true) {
+						blocked = false;
+					} else {
+						report  = true;
+						blocked = true;
+					}
+
+				} else if (level === 'gamma') {
+					blocked = false;
+				}
+
+			} else if (
+				url.mime.format.startsWith('font/') === true
+			) {
+
+				type    = 'asset';
+				blocked = true;
+
 			}
 
-		} else if (
-			url.mime.format.startsWith('font/') === true
-		) {
 
-			type    = 'asset';
-			blocked = true;
+			if (blocked === false) {
+
+				if (this.defiant.isBlocked(url_domain) === true) {
+					report  = true;
+					blocked = true;
+				}
+
+			}
+
+
+			if (blocked === true && report === true) {
+
+				this.report({
+					domain: domain,
+					link:   URL.render(url),
+					level:  level,
+					type:   type
+				});
+
+			}
 
 		}
 
 
 		if (blocked === false) {
 
-			if (this.defiant.isBlocked(url_domain) === true) {
-				report  = true;
-				blocked = true;
+			let redirects = [
+				redirect_imgur(URL.render(url)),
+				redirect_reddit(URL.render(url))
+			].filter((redirect) => redirect !== null);
+
+			if (redirects.length > 0) {
+
+				return {
+					redirectUrl: redirects[0]
+				};
+
 			}
 
 		}
-
-
-		if (blocked === true && report === true) {
-
-			this.report({
-				domain: domain,
-				link:   URL.render(url),
-				level:  level,
-				type:   type
-			});
-
-		}
-
 
 		return {
 			cancel: blocked

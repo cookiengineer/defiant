@@ -19,6 +19,9 @@
 		"default_popup": "chrome/popup.html",
 		"default_icon":  "design/icon-48.png"
 	},
+	"chrome_url_overrides": {
+		"newtab": "chrome/newtab.html"
+	},
 	"content_scripts": [
 		{
 			"matches": [

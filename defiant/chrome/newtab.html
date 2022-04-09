@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Defiant - Search</title>
+		<style>
+
+			@import url("../design/common/index.css");
+			@import url("../design/common/theme.css");
+			@import url("../design/common/elements.css");
+			@import url("../chrome/newtab.css");
+
+		</style>
+	</head>
+	<body data-page="newtab">
+		<header id="search">
+			<h2>Search</h2>
+			<input name="query" type="text" placeholder="What do you search?" title="?unknown, @persona, !article, /forum, #topic">
+			<select name="type">
+				<option value="unknown" selected>Unknown</option>
+				<option value="persona">Persona</option>
+				<option value="article">Article</option>
+				<option value="forum">Forum</option>
+				<option value="topic">Topic</option>
+			</select>
+			<button name="search"></button>
+		</header>
+		<section id="results">
+			<ul>
+				<li><a href="?query=%2Fnetsec">/netsec</a></li>
+				<li><a href="?query=%40cisagov">@cisagov</a></li>
+				<li><a href="?query=%23CVE-2022">#CVE-2022</a></li>
+				<li><a href="?query=RCE">RCE</a></li>
+				<li><a href="?query=CSRF">CSRF</a></li>
+				<li><a href="?query=SSRF">SSRF</a></li>
+				<li><a href="?query=remote%20execution">remote execution</a></li>
+				<li><a href="?query=remote%20exploit">remote exploit</a></li>
+				<li><a href="?query=vulnerability">vulnerability</a></li>
+			</ul>
+		</section>
+		<script type="module" src="newtab.mjs"></script>
+	</body>
+</html>

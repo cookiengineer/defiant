@@ -1,5 +1,13 @@
 [
 	{
+		"domain": "api.github.com",
+		"user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chromium/60.0.3112.78 Safari/537.36"
+	},
+	{
+		"domain": "github.com",
+		"user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chromium/60.0.3112.78 Safari/537.36"
+	},
+	{
 		"domain": "google.com",
 		"cookies": [
 			"CONSENT=YES+cb.20210618-11-p0.en+FX+953; Domain=google.com; Path=/; secure"
