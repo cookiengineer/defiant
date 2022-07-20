@@ -271,6 +271,8 @@ const Interceptor = function(settings, defiant, api) {
 			level  = tab.level.level;
 		}
 
+		console.log(url, level);
+
 
 		if (level === 'zero' || level === 'alpha') {
 
@@ -282,6 +284,8 @@ const Interceptor = function(settings, defiant, api) {
 		} else if (level === 'beta') {
 
 			// TODO: Allow Referer and Origin for first-party and second-party domain
+
+			// TODO: Allow cookie header
 
 		} else if (level === 'gamma') {
 			// Do Nothing
@@ -313,7 +317,17 @@ const Interceptor = function(settings, defiant, api) {
 
 			}).forEach((cookie) => {
 
-				cookie.attributes = {};
+				console.log(cookie);
+
+				// cookie.attributes = {
+				// 	'domain':   null,
+				// 	'expires':  null,
+				// 	'max-age':  null,
+				// 	'path':     null,
+				// 	'secure':   true,
+				// 	'httponly': true,
+				// 	'samesite': 'strict'
+				// };
 
 
 				let value = COOKIE.render(cookie);

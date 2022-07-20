@@ -10,6 +10,19 @@ import { search as search_reddit } from '../source/site/reddit.mjs';
 
 document.addEventListener('DOMContentLoaded', () => {
 
+	(() => {
+
+		let header = document.querySelector('header');
+		if (header !== null) {
+			Array.from(header.childNodes).forEach((node) => {
+				if (node.nodeName === '#text') {
+					node.parentNode.removeChild(node);
+				}
+			});
+		}
+
+	})();
+
 	const CACHE   = [];
 	const RESULTS = Element.query('section[id="results"] ul');
 	const SEARCH  = {

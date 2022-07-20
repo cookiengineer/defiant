@@ -4,8 +4,10 @@
 	"private": true,
 	"version": "2021.07",
 	"scripts": {
-		"build": "node ./build.mjs",
-		"test":  "mkdir /tmp/defiant; chromium --user-data-dir=/tmp/defiant --load-extension=$PWD/defiant"
+		"clean": "node ./defiant/make.mjs clean",
+		"build": "node ./defiant/make.mjs build",
+		"pack": "node ./defiant/make.mjs pack",
+		"test": "mkdir /tmp/defiant; chromium --user-data-dir=/tmp/defiant --load-extension=$PWD/defiant"
 	},
 	"dependencies": {
 		"esbuild": "^0.14.23"
