@@ -11,6 +11,12 @@
 - [ ] `https://i.imgur.com/....gifv` to `https://i.imgur.com/....mp4`
 - [ ] `https://youtube.com/watch?v=...` to `https://youtube.com/embed/...?html5=1`
 
+# Assets
+
+- [ ] Move JSON files to `/defiant/profile`.
+- [ ] Modify `Storage.mjs` and manifests to match asset paths.
+
+
 # Build Script
 
 - [ ] Import `blockers.json` from Stealth's Vendor Profile.
@@ -19,6 +25,8 @@
 # TODO
 
 - [ ] Add support for generation of `Content-Security-Policy` to `Interceptor.mjs` based on Trust Level.
+- [ ] Integrate an Update method for the JSON settings files.
+
 
 ## CSS Filters
 
